@@ -1,2 +1,13 @@
 # Ignorer hele mappen
 Python stuff - Chat GPT Example (ikke i brug)/
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+*.py[cod]
+__pycache__/
+.vscode/
+/Downloads/
+/downloads/
