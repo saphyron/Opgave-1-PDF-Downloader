@@ -182,15 +182,9 @@ Eksempel (`status.csv`):
 - Tilføjet statusrapport + fallback URL-logik
 - Dokumenteret “oh-shit moment”
 - Oprydning og kommentarer til alle klasser
-
-### 2025-10-05
-
 - MetadataLoader implementeret (Excel/CSV)
 - CLI parser (AppOptions) tilføjet
 - Implementeret DownloadManager med HttpClient
-
-### 2025-10-04
-
 - Projektstruktur og kravspecifikation etableret
 - UML-diagram oprettet
 
