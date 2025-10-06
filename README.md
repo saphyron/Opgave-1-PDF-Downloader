@@ -1,254 +1,223 @@
-| **# PDF Downloader** |
-| -------------------------- |
 
-|  |
-| - |
+# PDF-Downloader – README
+
+Robust og trådsikker .NET-applikation til at **downloade PDF-rapporter ud fra metadata i Excel eller CSV**.Projektet demonstrerer **multithreading, fejlhåndtering og fil-I/O**, og er baseret på en **realistisk kunde-case** fra Specialisterne.
+
+> **Target Framework:** net9.0
+> **Kerneservices:** ClosedXML, CsvHelper, System.Net.Http
+> **Kørsel:** CLI / Console • Windows, macOS og Linux
+> **Formål:** Stabil og hurtig bulk-download af rapporter med fallback-links og statusrapport.
+
+---
+
+## Funktioner
+
+- Læser metadata fra **Excel (.xlsx)** og **CSV** via *ClosedXML* og *CsvHelper*
+- Downloader PDF-filer fra kolonnerne `Pdf_URL` og `Pdf_URL_Alt`
+- Fallback-logik: prøver sekundær URL hvis den primære fejler
+- Parallelle downloads med konfigurerbar **MaxConcurrency**
+- Automatisk navngivning efter kolonnen **BRNum**
+- CSV-statusrapport (`status.csv`) med udfald og fejlbeskeder
+- Fejltolerant – håndterer timeouts, ugyldige links og afbrydelser
+- CLI-interface med mulighed for **limit** og **skip existing**
+
+---
+
+## Teknologier & Arkitektur
+
+**Runtime & CLI**
+
+- **.NET 9 Console App** (`Program.cs` → `ApplicationRunner`)
+- Command-line parser (`AppOptions.cs`) med tydelig validering
+- **CancellationToken** til Ctrl+C og clean shutdown
 
-| Dette repository indeholder en .NET-baseret løsning, som downloader PDF-rapporter ud fra en |
-| -------------------------------------------------------------------------------------------- |
+**Datahåndtering**
 
-| Excel- eller CSV-metadatafil. Værktøjet håndterer alternative URL'er, kører downloads parallelt |
-| --------------------------------------------------------------------------------------------------- |
+- **ClosedXML** – læser Excel-filer med headers og dynamiske kolonner
+- **CsvHelper** – robust parsing af CSV-filer uden fast schema
+- **MetadataLoader** – vælger automatisk korrekt parser (Excel/CSV)
 
-| og udskriver en statusrapport med resultatet for hver række. |
-| ------------------------------------------------------------- |
+**Multithreading**
 
-|  |
-| - |
+- **DownloadManager** bruger `SemaphoreSlim` til at begrænse samtidige downloads
+- **HttpClient** genbruges pr. instans (ingen socket leaks)
+- **ConcurrentBag** til trådsikker opsamling af resultater
 
-| **## Funktioner** |
-| ----------------------- |
+**Fejlhåndtering**
+
+- Klare udfald (`Downloaded`, `SkippedExisting`, `Failed`, `NoUrl`)
+- Detaljeret fejltekst (HTTP-kode, content-type, exception message)
+- “Fallback retry” pr. URL-sæt og fortsættelse ved fejl
 
-|  |
-| - |
+**Rapportering**
 
-| **-**Understøtter både Excel (**`.xlsx`**) og CSV som inputkilde. |
-| --------------------------------------------------------------------------------- |
+- **StatusReportWriter** genererer CSV-rapport med:
+  `Id, Outcome, Message, SourceUrl, SavedFile`
+- Fil-navne renses med `SanitizeFileName()` for gyldighed
 
-| **-**Kan bruge en fallback-URL, hvis det primære link fejler. |
-| -------------------------------------------------------------- |
+---
 
-| **-**Parallelle downloads med begrænsning på antal samtidige forbindelser. |
-| ---------------------------------------------------------------------------- |
+## Arkitektur (forenklet)
 
-| **-**Prototypetilstand henter som udgangspunkt højst 10 rapporter. |
-| ------------------------------------------------------------------- |
+```mermaid
+flowchart LR
+    subgraph CLI [Command Line Interface]
+        CMD[dotnet run -- ...]
+    end
 
-| **-**Rapporterer status (Downloadet, Skippet, Fejlet, Ingen URL) i en CSV-fil. |
-| ------------------------------------------------------------------------------ |
+    CMD -->|AppOptions| RUN[ApplicationRunner]
+    RUN --> LOAD[MetadataLoader]
+    LOAD -->|Excel/CSV| RECORDS[MetadataRecord[]]
+    RUN --> MGR[DownloadManager]
+    MGR -->|HTTP| PDF[(PDF-server)]
+    MGR --> FILES[Gemte PDF-filer]
+    RUN --> REPORT[StatusReportWriter]
+    REPORT --> CSV[status.csv]
+```
 
-|  |
-| - |
+---
 
-| **## Kom godt i gang** |
-| ---------------------------- |
+## Projektstruktur
 
-|  |
-| - |
+```text
+Opgave 1 PDF Downloader/
+├─ PDF Downloader.slnx
+├─ README.md
+├─ PDF Downloader/
+│  ├─ Program.cs
+│  ├─ appsettings.json
+│  ├─ src/
+│  │  └─ PdfDownloader.App/
+│  │     ├─ ApplicationRunner.cs
+│  │     ├─ AppOptions.cs
+│  │     ├─ Middleware/
+│  │     │  ├─ MetadataLoader.cs
+│  │     │  └─ MetadataRecord.cs
+│  │     ├─ Downloads/
+│  │     │  ├─ DownloadManager.cs
+│  │     │  ├─ DownloadRequest.cs
+│  │     │  ├─ DownloadResult.cs
+│  │     │  └─ DownloadOutcome.cs
+│  │     └─ Reporting/
+│  │        └─ StatusReportWriter.cs
+│  ├─ Downloads/
+│  │  ├─ status.csv
+│  │  └─ status_GRI.csv
+│  └─ samples/
+│     ├─ Metadata2006_2016.xlsx
+│     └─ GRI_2017_2020 (1).xlsx
+└─ docs/
+   ├─ kravspecifikation.md
+   └─ uml-sekvensdiagram.md
+```
 
-| **### Krav** |
-| ------------------ |
+---
 
-|  |
-| - |
+## Kørsel & CLI
 
-| **-**.NET 8 SDK |
-| --------------------- |
+### Standard eksekvering
 
-| **-**Adgang til de metadatafiler, der skal behandles (Excel eller CSV) |
-| ---------------------------------------------------------------------- |
+```bash
+dotnet run --   --input "..\samples\Metadata2006_2016.xlsx"   --output ".\Downloads"   --status ".\Downloads\status.csv"   --id-column "BRnum"   --url-column "Pdf_URL"   --fallback-url-column "Pdf_URL_Alt"   --limit 10   --max-concurrency 5
+```
 
-|  |
-| - |
+### “Oh-shit moment” (fuld kørsel hjemme)
 
-| **### Installation** |
-| -------------------------- |
+```bash
+dotnet run --   --input "..\samples\GRI_2017_2020 (1).xlsx"   --output ".\Downloads"   --status ".\Downloads\status_full.csv"   --id-column "BRnum"   --url-column "Pdf_URL"   --fallback-url-column "Pdf_URL_Alt"   --limit 0   --max-concurrency 50
+```
 
-|  |
-| - |
+> 💡 Brug `Ctrl+C` for at afbryde. DownloadManager lukker trådsikkert ned via `CancellationToken`.
 
-| **1.**Gendan NuGet-pakker i Visual Studio eller via** `dotnet restore`**. |
-| --------------------------------------------------------------------------------------- |
+---
 
-| **2.**Byg løsningen med** `dotnet build`**. |
-| ---------------------------------------------------------- |
+## Fejlhåndtering & Stabilitet
 
-|  |
-| - |
+| Udfald                    | Forklaring                                     |
+| ------------------------- | ---------------------------------------------- |
+| **Downloaded**      | PDF gemt korrekt                               |
+| **SkippedExisting** | Filen findes allerede                          |
+| **Failed**          | Fejl (HTTP, IO, timeout, forkert content-type) |
+| **NoUrl**           | Mangler gyldig URL i metadata                  |
 
-| **### Kørsel** |
-| --------------------- |
+- Hver fejl logges med årsag i `status.csv`
+- Timeout = 120 sekunder pr. request
+- Gyldige filnavne sikres via `SanitizeFileName`
+- Ugyldige eller tomme URL’er springes over
 
-|  |
-| - |
+---
 
-| Kør programmet fra projektmappen**`src/PdfDownloader.App`**: |
-| --------------------------------------------------------------- |
+## Concurrency og “Oh-shit moment”
 
-|  |
-| - |
+Ved første test forsøgte systemet at starte **26.923 samtidige downloads** 😱
+→ Resulterede i CPU-spikes og throttling-fejl.
 
-| **```bash** |
-| ----------------- |
+**Løsningen**
 
-| **dotnet run -- \** |
-| --------------------- |
+- Introduceret **SemaphoreSlim** for max N samtidige downloads
+- CLI-parameter `--max-concurrency` (1-32 standard)
+- Stabilitet ved store dataset
+- 50 samtidige tråde = ~100x hastighedsforbedring uden overload
 
-| **--input /sti/til/GRI_2017_2020.xlsx \** |
-| ------------------------------------------- |
+---
 
-| **--output ./Downloads \** |
-| ---------------------------- |
+## Statusrapport (CSV)
 
-| **--status ./Downloads/status.csv \** |
-| --------------------------------------- |
+Eksempel (`status.csv`):
 
-| **--id-column BRnum \** |
-| ------------------------- |
+| Id    | Outcome         | Message            | SourceUrl   | OutputPath            |
+| ----- | --------------- | ------------------ | ----------- | --------------------- |
+| BR001 | Downloaded      |                    | https://... | ./Downloads/BR001.pdf |
+| BR002 | Failed          | HTTP 404 Not Found | https://... |                       |
+| BR003 | SkippedExisting | Allerede hentet    |             | ./Downloads/BR003.pdf |
 
-| **--url-column Pdf_URL \** |
-| ---------------------------- |
+---
 
-| **--fallback-url-column Pdf_URL_Alt** |
-| ------------------------------------------- |
+## Versionshistorik
 
-| **```** |
-| ------------- |
+### 2025-10-06
 
-|  |
-| - |
+- Første stabile version med fuld concurrency-styring
+- Tilføjet statusrapport + fallback URL-logik
+- Dokumenteret “oh-shit moment”
+- Oprydning og kommentarer til alle klasser
 
-| Vigtige argumenter: |
-| ------------------- |
+### 2025-10-05
 
-|  |
-| - |
+- MetadataLoader implementeret (Excel/CSV)
+- CLI parser (AppOptions) tilføjet
+- Implementeret DownloadManager med HttpClient
 
-| **-**`--input`(påkrævet): Sti til metadatafilen (.xlsx eller .csv). |
-| ----------------------------------------------------------------------------- |
+### 2025-10-04
 
-| **-**`--output`: Mappe hvor PDF'er gemmes (standard:**`./Downloads`**). |
-| --------------------------------------------------------------------------------------- |
+- Projektstruktur og kravspecifikation etableret
+- UML-diagram oprettet
 
-| **-**`--status`: Sti til en CSV-statusrapport (valgfrit). |
-| ----------------------------------------------------------------- |
+---
 
-| **-**`--id-column`: Kolonnenavn der indeholder id'et, som bruges til filnavne (standard:**`BRnum`**). |
-| ------------------------------------------------------------------------------------------------------------------------ |
+## Designbeskrivelse & Begrundelser
 
-| **-**`--url-column`: Kolonnenavn med den primære URL (standard:**`Pdf_URL`**). |
-| ----------------------------------------------------------------------------------------------- |
+- **Separation of Concerns** `MetadataLoader`, `DownloadManager` og `StatusReportWriter` har hver deres afgrænsede ansvar.
+- **Concurrent design** `SemaphoreSlim` styrer parallelisme – balance mellem hastighed og netværksbelastning.
+- **HttpClient reuse**Undgår socket-udmattelse og sikrer hurtig genbrug af forbindelser.
+- **Fallback-logik**Prøver alternativ URL, hvis primær fejler – uden at stoppe hele processen.
+- **Statusrapportering**CSV-fil gør det muligt at genoptage, fejlsøge og validere resultater efterfølgende.
+- **Idempotent drift**
+  Skip-existing logik muliggør sikre genkørsler.
 
-| **-**`--fallback-url-column`: Kolonnenavn med alternativ URL (standard:**`Pdf_URL_Alt`**). |
-| ---------------------------------------------------------------------------------------------------------- |
+---
 
-| **-**`--limit`: Maksimalt antal rækker der behandles (standard:**`10`**). |
-| ------------------------------------------------------------------------------------------ |
+## Fremtidige forbedringer
 
-| **-**`--max-concurrency`: Antal samtidige downloads (standard:**`4`**). |
-| --------------------------------------------------------------------------------------- |
+- **Logging til fil** (fx Serilog)
+- **Exponential backoff** ved fejl eller timeouts
+- **GUI-frontend** til monitorering
+- **Resumér delvist hentede filer**
+- **Parallel progressbar / CLI feedback**
+- **Unit tests og mocks for HTTP-requests**
 
-| **-**`--no-skip-existing`: Medtag for at overskrive allerede hentede filer. |
-| ----------------------------------------------------------------------------------- |
+---
 
-|  |
-| - |
+## Licens
 
-| Tryk**`Ctrl+C`**for at annullere under kørsel. |
-| ------------------------------------------------- |
-
-|  |
-| - |
-
-| **## Output** |
-| ------------------- |
-
-|  |
-| - |
-
-| **-**PDF-filer gemmes i den angivne outputmappe og navngives** `<ID>.pdf`**. |
-| ------------------------------------------------------------------------------------------ |
-
-| **-**Hvis** `--status`**er angivet, skrives en CSV-rapport med kolonnerne** `Id`**,**`Status`**,**`Message`**, |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-
-| **`SourceUrl`**og** `OutputPath`**. |
-| --------------------------------------------------- |
-
-|  |
-| - |
-
-| **## Projektstruktur** |
-| ---------------------------- |
-
-|  |
-| - |
-
-| **```** |
-| ------------- |
-
-| **PdfDownloader.sln** |
-| --------------------------- |
-
-| **└── src/** |
-| --------------------- |
-
-| **└── PdfDownloader.App/** |
-| ----------------------------------- |
-
-| **├── Downloads/        # Downloadlogik og resultater** |
-| ---------------------------------------------------------------- |
-
-| **├── Metadata/         # Indlæsning af Excel/CSV-data** |
-| ------------------------------------------------------------------ |
-
-| **├── Reporting/        # Generering af statusrapporter** |
-| ------------------------------------------------------------------ |
-
-| **├── AppOptions.cs     # Kommandolinjehåndtering** |
-| ------------------------------------------------------------- |
-
-| **├── ApplicationRunner.cs** |
-| ------------------------------------- |
-
-| **└── Program.cs** |
-| --------------------------- |
-
-| **```** |
-| ------------- |
-
-|  |
-| - |
-
-| **## Udvidelser** |
-| ----------------------- |
-
-|  |
-| - |
-
-| **-**Justér** `--limit`**når løsningen skal skaleres ud over prototypetilstanden. |
-| -------------------------------------------------------------------------------------------- |
-
-| **-**Planlagt videreudvikling kan inkludere logging til filer og en GUI til batchovervågning. |
-| ---------------------------------------------------------------------------------------------- |
-
-|  |
-| - |
-
-| **## Dokumentation** |
-| -------------------------- |
-
-|  |
-| - |
-
-| **-**[**Kravspecifikation**](**docs/kravspecifikation.md**) |
-| -------------------------------------------------------------------- |
-
-- [**UML sekvensdiagram**](**docs/uml-sekvensdiagram.md**)
-## Samples
-- `samples/Metadata2006_2016.xlsx`: Example metadata covering 2006-2016, including id column `BRnum` og URL felterne `Pdf_URL` og `Pdf_URL_Alt`.
-- `samples/GRI_2017_2020 (1).xlsx`: Additional dataset that matches de samme kolonnenavne og kan bruges til at teste fallback URL logik.
-- Begge filer bliver nu markeret som projektindhold og kopieres til output ved build, saa de altid er tilgaengelige sammen med binarierne.
-- Hurtig test i projektroden: `dotnet run -- --input "..\samples\Metadata2006_2016.xlsx" --output .\Downloads --status .\Downloads\status.csv`.
-
-
+Se `LICENSE` i roden af repoet.
