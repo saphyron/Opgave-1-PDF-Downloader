@@ -2,87 +2,80 @@ namespace PdfDownloader.App;
 
 internal sealed record AppOptions
 (
-    FileInfo Input,
-    DirectoryInfo Output,
-    FileInfo? StatusReport,
-    string IdColumn,
-    string UrlColumn,
-    string? FallbackUrlColumn,
-    int Limit,
-    int MaxConcurrency,
-    bool SkipExisting
+    FileInfo Input,                 // skal eksistere
+    DirectoryInfo Output,           // skal eksistere
+    FileInfo? StatusReport,         // kan være null
+    string IdColumn,                // ID-kolonne
+    string UrlColumn,               // primær URL-kolonne
+    string? FallbackUrlColumn,      // kan være null
+    int Limit,                      // 0 = ingen grænse
+    int MaxConcurrency,             // maks antal samtidige downloads
+    bool SkipExisting,              // hvis true: spring over hvis fil findes
+    FileInfo? ResumeFromStatus,     // hvis angivet: genoptag fra status-fil
+    bool AppendStatus,              // hvis true: tilføj til eksisterende status-fil (hvis findes)
+    bool OverwriteStatus,           // hvis true: skriv ny status-fil (overskriv eksisterende)
+    int? First,                     // tager de første N rækker
+    int? Skip,                      // skip N, tag resten (evt. afgrænset af Take)
+    int? Take,                      // tag N (efter Skip)
+    int? FromIndex,                 // 1-baseret startposition
+    int? ToIndex,                   // 1-baseret slutposition (inklusiv)
+    bool OverwriteDownloads,        // hvis true: hent igen selvom fil findes
+    bool DetectChanges,             // hvis true: sammenlign med eksisterende (SHA-256)
+    bool KeepOldOnChange            // hvis true: omdøb gammel til *.updated ved forskel
 )
 {
-    public static string Usage => "Brug: dotnet run -- --input <sti> [--output <mappe>] [--status <fil>] [--id-column <navn>] [--url-column <navn>] [--fallback-url-column <navn>] [--limit <tal>] [--max-concurrency <tal>] [--no-skip-existing]";
+    public static string Usage => """
+Brug: dotnet run -- --input <sti> --output <dir> [--status <sti>] 
+                   --id-column <navn> --url-column <navn> [--fallback-url-column <navn>]
+                   [--limit <tal>] [--max-concurrency <tal>] [--no-skip-existing]
+                   [--resume-from-status <sti>] [--append-status] [--overwrite-status]
+                   [--first <N>] [--skip <N>] [--take <N>] [--from <i>] [--to <j>]
+                   [--overwrite-downloads] [--detect-changes] [--keep-old-on-change]
+""";
 
     public static AppOptions Parse(string[] args)
     {
-        if (args.Length == 0)
+        // helper
+        string? Get(string name)
         {
-            throw new OptionParsingException("Der mangler argumenter.");
+            var i = Array.FindIndex(args, a => string.Equals(a, $"--{name}", StringComparison.OrdinalIgnoreCase));
+            return (i >= 0 && i + 1 < args.Length) ? args[i + 1] : null;
         }
+        bool Has(string name) => args.Any(a => string.Equals(a, $"--{name}", StringComparison.OrdinalIgnoreCase));
 
-        var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var flags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var inputStr   = Get("input") ?? throw new OptionParsingException("Mangler --input");
+        var outputStr  = Get("output") ?? throw new OptionParsingException("Mangler --output");
 
-        for (var i = 0; i < args.Length; i++)
-        {
-            var arg = args[i];
-            if (!arg.StartsWith("--", StringComparison.Ordinal))
-            {
-                throw new OptionParsingException($"Ukendt argument: {arg}");
-            }
+        var idColumn   = Get("id-column")   ?? "BRnum";
+        var urlColumn  = Get("url-column")  ?? "Pdf_URL";
+        var fallback   = Get("fallback-url-column");
 
-            var name = arg[2..];
-            if (name.Equals("no-skip-existing", StringComparison.OrdinalIgnoreCase))
-            {
-                flags.Add(name);
-                continue;
-            }
+        var statusStr  = Get("status");
+        var limit      = int.TryParse(Get("limit"), out var lim) ? lim : 0;
+        var maxConc    = int.TryParse(Get("max-concurrency"), out var mc) ? mc : 10;
+        var skipExisting = !Has("no-skip-existing");
 
-            if (i + 1 >= args.Length)
-            {
-                throw new OptionParsingException($"Forventede en værdi efter {arg}");
-            }
+        var resumeStr  = Get("resume-from-status");
+        var append     = Has("append-status");        // default false
+        var overwriteS = Has("overwrite-status");     // default false
+        if (append && overwriteS) throw new OptionParsingException("Vælg enten --append-status eller --overwrite-status (ikke begge).");
+        // default: hvis ingen angives → append=true hvis status-fil eksisterer, ellers opret ny og skriv header
+        if (!append && !overwriteS) append = true;
 
-            var value = args[++i];
-            values[name] = value;
-        }
+        int? first     = int.TryParse(Get("first"), out var f) ? f : null;
+        int? skip      = int.TryParse(Get("skip"),  out var s) ? s : null;
+        int? take      = int.TryParse(Get("take"),  out var t) ? t : null;
+        int? fromIdx   = int.TryParse(Get("from"),  out var fi) ? fi : null;
+        int? toIdx     = int.TryParse(Get("to"),    out var ti) ? ti : null;
 
-        if (!values.TryGetValue("input", out var inputPath))
-        {
-            throw new OptionParsingException("Optionen --input er påkrævet.");
-        }
+        var overwriteDownloads = Has("overwrite-downloads");
+        var detectChanges      = Has("detect-changes");
+        var keepOldOnChange    = Has("keep-old-on-change") || overwriteDownloads; // giver mening at gemme gammel hvis vi overwriter
 
-        var input = new FileInfo(inputPath);
-        if (!input.Exists)
-        {
-            throw new OptionParsingException($"Filen '{input.FullName}' blev ikke fundet.");
-        }
-
-        var output = values.TryGetValue("output", out var outputPath)
-            ? new DirectoryInfo(outputPath)
-            : new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, "Downloads"));
-
-        var status = values.TryGetValue("status", out var statusPath)
-            ? new FileInfo(statusPath)
-            : null;
-
-        var idColumn = values.TryGetValue("id-column", out var id) ? id : "BRnum";
-        var urlColumn = values.TryGetValue("url-column", out var url) ? url : "Pdf_URL";
-        var fallback = values.TryGetValue("fallback-url-column", out var alt) ? alt : "Pdf_URL_Alt";
-
-        var limit = 10;
-        if (values.TryGetValue("limit", out var limitString) && int.TryParse(limitString, out var parsedLimit))
-        {
-            limit = parsedLimit <= 0 ? int.MaxValue : parsedLimit;
-        }
-
-        var maxConcurrency = values.TryGetValue("max-concurrency", out var concString) && int.TryParse(concString, out var parsedConcurrency)
-            ? Math.Clamp(parsedConcurrency, 1, 32)
-            : 4;
-
-        var skipExisting = !flags.Contains("no-skip-existing");
+        var input   = new FileInfo(inputStr);
+        var output  = new DirectoryInfo(outputStr);
+        var status  = string.IsNullOrWhiteSpace(statusStr) ? null : new FileInfo(statusStr);
+        var resume  = string.IsNullOrWhiteSpace(resumeStr) ? null : new FileInfo(resumeStr);
 
         return new AppOptions(
             input,
@@ -92,8 +85,20 @@ internal sealed record AppOptions
             urlColumn,
             string.IsNullOrWhiteSpace(fallback) ? null : fallback,
             limit,
-            maxConcurrency,
-            skipExisting);
+            maxConc,
+            skipExisting,
+            resume,
+            append,
+            overwriteS,
+            first,
+            skip,
+            take,
+            fromIdx,
+            toIdx,
+            overwriteDownloads,
+            detectChanges,
+            keepOldOnChange
+        );
     }
 }
 

@@ -8,30 +8,35 @@ namespace PdfDownloader.App.Reporting;
 
 internal static class StatusReportWriter
 {
-    public static async Task WriteAsync(FileInfo file, IReadOnlyList<DownloadResult> results, CancellationToken cancellationToken)
+    public static async Task WriteAsync(FileInfo file, IReadOnlyList<DownloadResult> results, bool append, bool overwrite, CancellationToken cancellationToken)
     {
         Directory.CreateDirectory(file.Directory?.FullName ?? Environment.CurrentDirectory);
 
-        await using var stream = file.Open(FileMode.Create, FileAccess.Write, FileShare.None);
-        await using var writer = new StreamWriter(stream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        if (overwrite && file.Exists)
+            file.Delete();
 
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        var writeHeader = !append || !file.Exists;
+
+        using var stream = new FileStream(file.FullName, append ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.Read);
+        using var writer = new StreamWriter(stream, new UTF8Encoding(false));
+        using var csv = new CsvWriter(writer, new CsvConfiguration(CultureInfo.InvariantCulture)
         {
-            HasHeaderRecord = true,
-        };
+            HasHeaderRecord = writeHeader
+        });
 
-        using var csv = new CsvWriter(writer, config);
-        csv.WriteField("Id");
-        csv.WriteField("Status");
-        csv.WriteField("Message");
-        csv.WriteField("SourceUrl");
-        csv.WriteField("OutputPath");
-        csv.NextRecord();
+        if (writeHeader)
+        {
+            csv.WriteField("Id");
+            csv.WriteField("Outcome");
+            csv.WriteField("Message");
+            csv.WriteField("SourceUrl");
+            csv.WriteField("SavedFile");
+            csv.NextRecord();
+        }
 
         foreach (var result in results)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
             csv.WriteField(result.Id);
             csv.WriteField(result.Outcome.ToString());
             csv.WriteField(result.Message ?? string.Empty);
