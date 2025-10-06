@@ -61,18 +61,19 @@ Robust og trådsikker .NET-applikation til at **downloade PDF-rapporter ud fra m
 
 ```mermaid
 flowchart LR
-    subgraph CLI [Command Line Interface]
-        CMD[dotnet run -- ...]
+    subgraph CLI["Command Line Interface"]
+        CMD["dotnet run -- ..."]
     end
 
-    CMD -->|AppOptions| RUN[ApplicationRunner]
-    RUN --> LOAD[MetadataLoader]
-    LOAD -->|Excel/CSV| RECORDS[MetadataRecord[]]
-    RUN --> MGR[DownloadManager]
-    MGR -->|HTTP| PDF[(PDF-server)]
-    MGR --> FILES[Gemte PDF-filer]
-    RUN --> REPORT[StatusReportWriter]
-    REPORT --> CSV[status.csv]
+    CMD -->|AppOptions| RUN["ApplicationRunner"]
+    RUN --> LOAD["MetadataLoader"]
+    LOAD -->|Excel/CSV| RECORDS["MetadataRecord[]"]
+    RUN --> MGR["DownloadManager"]
+    MGR -->|HTTP| PDF[(PDF server)]
+    MGR --> FILES["Gemte PDF-filer"]
+    RUN --> REPORT["StatusReportWriter"]
+    REPORT --> CSV["status.csv"]
+
 ```
 
 ---
