@@ -1,7 +1,7 @@
 # Ignorer hele mappen
 Python stuff - Chat GPT Example (ikke i brug)/
-bin/
-obj/
+PDF Downloader/bin/*
+PDF Downloader/obj/*
 *.user
 *.suo
 .vs/
