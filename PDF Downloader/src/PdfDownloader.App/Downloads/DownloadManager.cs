@@ -14,13 +14,31 @@ internal sealed class DownloadManager : IDisposable
     private readonly bool _detectChanges;
     private readonly bool _keepOldOnChange;
 
-    public DownloadManager(DirectoryInfo outputDirectory, int maxConcurrency, bool skipExisting,
-                           bool overwriteDownloads, bool detectChanges, bool keepOldOnChange)
+    // logging + timing
+    private readonly Action<string> _log;
+    private readonly ConcurrentDictionary<string, DateTimeOffset> _startTimes = new();
+    private readonly ConcurrentDictionary<string, string> _states = new();
+
+    // "tråde" (slots) for at kunne beregne gennemsnit pr. tråd
+    private readonly ConcurrentQueue<int> _slotPool;
+    private readonly ConcurrentDictionary<string, int> _slotOfId = new();
+    private readonly ConcurrentDictionary<int, long> _slotTotalMs = new(); // ms pr. slot
+    private readonly ConcurrentDictionary<int, int> _slotCounts = new();
+
+    // Prod-ctor (bruger default HttpClient)
+    public DownloadManager(
+        DirectoryInfo outputDirectory,
+        int maxConcurrency,
+        bool skipExisting,
+        bool overwriteDownloads,
+        bool detectChanges,
+        bool keepOldOnChange,
+        Action<string>? logger = null)
     {
         _outputDirectory = outputDirectory;
         _httpClient = new HttpClient
         {
-            Timeout = TimeSpan.FromSeconds(120)
+            Timeout = TimeSpan.FromSeconds(60) // 120 → 60 sek
         };
         _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PdfDownloader", "1.0"));
         _httpClient.DefaultRequestHeaders.Accept.TryParseAdd("application/pdf");
@@ -30,6 +48,50 @@ internal sealed class DownloadManager : IDisposable
         _overwriteDownloads = overwriteDownloads;
         _detectChanges = detectChanges;
         _keepOldOnChange = keepOldOnChange;
+
+        _log = logger ?? Console.WriteLine;
+
+        _slotPool = new ConcurrentQueue<int>(Enumerable.Range(1, _maxConcurrency));
+        foreach (var s in Enumerable.Range(1, _maxConcurrency))
+        {
+            _slotTotalMs[s] = 0;
+            _slotCounts[s] = 0;
+        }
+    }
+
+    // Test-ctor (tillader injektion af HttpMessageHandler)
+    internal DownloadManager(
+        DirectoryInfo outputDirectory,
+        int maxConcurrency,
+        bool skipExisting,
+        bool overwriteDownloads,
+        bool detectChanges,
+        bool keepOldOnChange,
+        HttpMessageHandler httpHandler,
+        Action<string>? logger = null)
+    {
+        _outputDirectory = outputDirectory;
+        _httpClient = new HttpClient(httpHandler)
+        {
+            Timeout = TimeSpan.FromSeconds(60) // 120 → 60 sek
+        };
+        _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PdfDownloader", "1.0"));
+        _httpClient.DefaultRequestHeaders.Accept.TryParseAdd("application/pdf");
+
+        _maxConcurrency = Math.Max(1, maxConcurrency);
+        _skipExisting = skipExisting;
+        _overwriteDownloads = overwriteDownloads;
+        _detectChanges = detectChanges;
+        _keepOldOnChange = keepOldOnChange;
+
+        _log = logger ?? Console.WriteLine;
+
+        _slotPool = new ConcurrentQueue<int>(Enumerable.Range(1, _maxConcurrency));
+        foreach (var s in Enumerable.Range(1, _maxConcurrency))
+        {
+            _slotTotalMs[s] = 0;
+            _slotCounts[s] = 0;
+        }
     }
 
     public async Task<IReadOnlyList<DownloadResult>> DownloadAsync(IEnumerable<DownloadRequest> requests, CancellationToken ct)
@@ -42,35 +104,54 @@ internal sealed class DownloadManager : IDisposable
         var tasks = requests.Select(async req =>
         {
             await throttler.WaitAsync(ct).ConfigureAwait(false);
+            string? lastReason = null;
+            var slot = RentSlot();
+
             try
             {
+                StartRow(req.Id, "Klargør", slot);
+
                 var file = new FileInfo(Path.Combine(_outputDirectory.FullName, SanitizeFileName(req.Id) + ".pdf"));
 
+                // Skip eksisterende
                 if (file.Exists && !_overwriteDownloads && _skipExisting)
                 {
-                    results.Add(new DownloadResult(req.Id, DownloadOutcome.SkippedExisting, "Already exists", null, file));
+                    var res = new DownloadResult(req.Id, DownloadOutcome.SkippedExisting, "Already exists", null, file);
+                    CompleteRow(res, slot);
+                    results.Add(res);
                     return;
                 }
 
-                // prøv primær → fallback
+                // primær → fallback
                 foreach (var url in req.Urls)
                 {
                     if (string.IsNullOrWhiteSpace(url)) continue;
+
                     try
                     {
+                        UpdateRow(req.Id, "Henter (headers)...", slot);
                         using var resp = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
-                        if (!resp.IsSuccessStatusCode) { continue; }
 
-                        var contentType = resp.Content.Headers.ContentType?.MediaType ?? "";
-                        if (!contentType.Contains("pdf", StringComparison.OrdinalIgnoreCase))
+                        if (!resp.IsSuccessStatusCode)
                         {
-                            // Nogle sites returnerer application/octet-stream – accepter begge
-                            if (!string.Equals(contentType, "application/octet-stream", StringComparison.OrdinalIgnoreCase))
-                                continue;
+                            lastReason = $"HTTP {(int)resp.StatusCode}";
+                            UpdateRow(req.Id, $"{lastReason} – prøver næste", slot);
+                            continue;
                         }
 
-                        // hent til memory/temporær fil for evt. sammenligning
+                        var contentType = resp.Content.Headers.ContentType?.MediaType ?? "";
+                        var isPdf = contentType.Contains("pdf", StringComparison.OrdinalIgnoreCase)
+                                    || string.Equals(contentType, "application/octet-stream", StringComparison.OrdinalIgnoreCase);
+                        if (!isPdf)
+                        {
+                            lastReason = $"Content-Type: {contentType}";
+                            UpdateRow(req.Id, $"{lastReason} – skipper", slot);
+                            continue;
+                        }
+
+                        // hent til temp (mulig ændringsdetektion)
                         var tempPath = Path.GetTempFileName();
+                        UpdateRow(req.Id, "Downloader indhold...", slot);
                         await using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             await resp.Content.CopyToAsync(fs, ct).ConfigureAwait(false);
@@ -89,7 +170,9 @@ internal sealed class DownloadManager : IDisposable
                             if (!changed && !_overwriteDownloads)
                             {
                                 File.Delete(tempPath);
-                                results.Add(new DownloadResult(req.Id, DownloadOutcome.SkippedExisting, "No change detected", new Uri(url), file));
+                                var noChange = new DownloadResult(req.Id, DownloadOutcome.SkippedExisting, "No change detected", new Uri(url), file);
+                                CompleteRow(noChange, slot);
+                                results.Add(noChange);
                                 return;
                             }
 
@@ -98,7 +181,6 @@ internal sealed class DownloadManager : IDisposable
                                 var updated = Path.Combine(file.Directory!.FullName, Path.GetFileNameWithoutExtension(file.Name) + ".updated.pdf");
                                 if (File.Exists(updated))
                                 {
-                                    // unik suffix for flere opdateringer
                                     updated = Path.Combine(file.Directory!.FullName, Path.GetFileNameWithoutExtension(file.Name) + $".updated-{DateTime.UtcNow:yyyyMMddHHmmss}.pdf");
                                 }
                                 File.Move(file.FullName, updated, overwrite: false);
@@ -108,29 +190,122 @@ internal sealed class DownloadManager : IDisposable
                         File.Copy(tempPath, file.FullName, overwrite: true);
                         File.Delete(tempPath);
 
-                        results.Add(new DownloadResult(req.Id, DownloadOutcome.Downloaded, null, new Uri(url), file));
+                        var ok = new DownloadResult(req.Id, DownloadOutcome.Downloaded, null, new Uri(url), file);
+                        CompleteRow(ok, slot);
+                        results.Add(ok);
                         return;
+                    }
+                    catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+                    {
+                        lastReason = "Timeout";
+                        UpdateRow(req.Id, "Timeout – prøver næste", slot);
+                        continue;
                     }
                     catch (Exception ex) when (ex is not OperationCanceledException)
                     {
-                        // prøv næste URL (fallback)
+                        lastReason = $"Exception: {ex.GetType().Name}";
+                        UpdateRow(req.Id, "Fejl – prøver næste URL", slot);
                         continue;
                     }
                 }
 
-                // hvis vi er her: alle forsøg fejlede
-                var msg = req.Urls.Count == 0 ? "No URL" : "All URLs failed";
+                // alle forsøg fejlede
+                var msg = req.Urls.Count == 0 ? "No URL" : (lastReason ?? "All URLs failed");
                 var outcome = req.Urls.Count == 0 ? DownloadOutcome.NoUrl : DownloadOutcome.Failed;
-                results.Add(new DownloadResult(req.Id, outcome, msg, null, null));
+
+                var failed = new DownloadResult(req.Id, outcome, msg, null, null);
+                CompleteRow(failed, slot);
+                results.Add(failed);
             }
             finally
             {
+                _startTimes.TryRemove(req.Id, out _);
+                _states.TryRemove(req.Id, out _);
+                _slotOfId.TryRemove(req.Id, out _);
+                ReturnSlot(slot);
                 throttler.Release();
             }
         });
 
         await Task.WhenAll(tasks).ConfigureAwait(false);
         return results.ToList();
+    }
+
+    // ---------- helpers: log + tid + slots ----------
+    private void StartRow(string id, string state, int slot)
+    {
+        _startTimes.TryAdd(id, DateTimeOffset.UtcNow);
+        _states[id] = state;
+        _slotOfId[id] = slot;
+        _log($"[START] {id} - Klargør");
+    }
+
+    private void UpdateRow(string id, string state, int slot)
+    {
+        _states[id] = state;
+        _log($"[UPDATE] {id} [{ElapsedFor(id)}] - {state}");
+    }
+
+    private void CompleteRow(DownloadResult result, int slot)
+    {
+        var id = result.Id;
+        var elapsed = ElapsedFor(id);
+
+        // akkumulér pr. slot
+        if (_startTimes.TryGetValue(id, out var t0))
+        {
+            var ms = (long)(DateTimeOffset.UtcNow - t0).TotalMilliseconds;
+            _slotTotalMs.AddOrUpdate(slot, ms, (_, cur) => cur + ms);
+            _slotCounts.AddOrUpdate(slot, 1, (_, cur) => cur + 1);
+        }
+
+        var (tag, human) = result.Outcome switch
+        {
+            DownloadOutcome.Downloaded      => ("OK",   "PDF gemt korrekt"),
+            DownloadOutcome.SkippedExisting => ("SKIP", "Filen findes allerede"),
+            DownloadOutcome.NoUrl           => ("MISS", "Mangler gyldig URL i metadata"),
+            _                               => ("FAIL", "Fejl (HTTP, IO, timeout, forkert content-type)")
+        };
+
+        var extra = result.Message is { Length: > 0 } ? $" - {result.Message}" : "";
+        _log($"[{tag}] {id} ({elapsed}) - {human}{extra}");
+    }
+
+    private string ElapsedFor(string id)
+    {
+        if (_startTimes.TryGetValue(id, out var t0))
+        {
+            var ts = DateTimeOffset.UtcNow - t0;
+            return $"{(int)ts.TotalMinutes:00}:{ts.Seconds:00}";
+        }
+        return "00:00";
+    }
+
+    private int RentSlot()
+    {
+        // WaitAsync sørger for at der *bør* være en ledig slot. Spin meget kort hvis race.
+        int slot;
+        while (!_slotPool.TryDequeue(out slot))
+        {
+            Thread.SpinWait(50);
+        }
+        return slot;
+    }
+
+    private void ReturnSlot(int slot) => _slotPool.Enqueue(slot);
+
+    public IReadOnlyList<(int Slot, int Count, TimeSpan Total, TimeSpan Average)> GetSlotStats()
+    {
+        var list = new List<(int, int, TimeSpan, TimeSpan)>();
+        foreach (var s in Enumerable.Range(1, _maxConcurrency))
+        {
+            var totalMs = _slotTotalMs.TryGetValue(s, out var ms) ? ms : 0L;
+            var count = _slotCounts.TryGetValue(s, out var c) ? c : 0;
+            var total = TimeSpan.FromMilliseconds(totalMs);
+            var avg = count > 0 ? TimeSpan.FromMilliseconds(totalMs / (double)count) : TimeSpan.Zero;
+            list.Add((s, count, total, avg));
+        }
+        return list;
     }
 
     private static byte[] ComputeSHA256(string path)

@@ -11,3 +11,7 @@ __pycache__/
 .vscode/
 /Downloads/
 /downloads/
+*.pdf
+tests/PdfDownloader.Tests/bin/*
+tests/PdfDownloader.Tests/obj/*
+*.log
