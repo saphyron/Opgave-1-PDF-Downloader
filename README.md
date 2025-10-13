@@ -328,6 +328,18 @@ Eksempel (`status.csv`):
 - **Load-tests** (NBomber/k6) på 1k/10k/50k rækker
 - **Static analysis** (Roslyn analyzers, StyleCop) og kodecov
 
+### Testing
+
+
+Krav: .NET 9 SDK.
+
+
+```powershell
+dotnet restore
+dotnet build -c Release
+dotnet test -c Release --settings .runsettings --collect "XPlat Code Coverage"
+```
+
 ### Dokumentation & DX
 
 - **Manpages/Help**: `--help` med eksempelscenarier (resume, range, overwrite)
