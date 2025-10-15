@@ -15,3 +15,4 @@ __pycache__/
 tests/PdfDownloader.Tests/bin/*
 tests/PdfDownloader.Tests/obj/*
 *.log
+PDF Downloader/Downloads/*
