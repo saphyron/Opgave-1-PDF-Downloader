@@ -1,0 +1,311 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="de39c388-8b24-4a3f-b413-96680c32a4d6" name="JohnGrandtMarkvardHø@SPAC-38-LTP2347 2025-10-15 10:13:06" runUser="AzureAD\JohnGrandtMarkvardHø" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2025-10-15T10:13:06.3818580+02:00" queuing="2025-10-15T10:13:06.3818585+02:00" start="2025-10-15T10:13:04.8540301+02:00" finish="2025-10-15T10:13:17.5827873+02:00" />
+  <TestSettings name="default" id="801d41df-533a-42c9-8e7a-2581349f28e0">
+    <Deployment runDeploymentRoot="JohnGrandtMarkvardHø_SPAC-38-LTP2347_2025-10-15_10_13_06" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="3c609f07-286b-4938-9130-2b4e5b4ff732" testId="ab72640d-1e8d-a7b8-41f6-ab778e15d563" testName="PdfDownloader.Tests.Unit.AppOptionsTests.Unknown_Extension_Throws" computerName="SPAC-38-LTP2347" duration="00:00:00.0115880" startTime="2025-10-15T10:13:06.3044839+02:00" endTime="2025-10-15T10:13:06.3045057+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3c609f07-286b-4938-9130-2b4e5b4ff732" />
+    <UnitTestResult executionId="413a4867-e844-4363-b256-ad54ff8b3975" testId="2369fdd2-0552-c370-b267-a36db94d8b72" testName="PdfDownloader.Tests.Unit.DownloadManagerTests.Timeout_Is_Reported_As_Failed_With_Timeout_Message" computerName="SPAC-38-LTP2347" duration="00:00:00.0022715" startTime="2025-10-15T10:13:07.0836912+02:00" endTime="2025-10-15T10:13:07.0836913+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="413a4867-e844-4363-b256-ad54ff8b3975" />
+    <UnitTestResult executionId="76727379-6748-47fe-b1a8-9cebdfcaca63" testId="a240b2d3-5d47-ad7d-4599-a7b6dd81c30b" testName="PdfDownloader.Tests.Integration.PipelineIntegrationTests.Csv_to_statusfile_roundtrip_smoke" computerName="SPAC-38-LTP2347" duration="00:00:10.9445128" startTime="2025-10-15T10:13:17.2350255+02:00" endTime="2025-10-15T10:13:17.2350257+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="76727379-6748-47fe-b1a8-9cebdfcaca63" />
+    <UnitTestResult executionId="e7f93c8a-e020-4fbd-97df-906049ba56c9" testId="1b6a6beb-8457-8bde-cee2-301957118ec9" testName="PdfDownloader.Tests.Unit.DownloadManagerTests.Skips_NonPdf_ContentType_Except_OctetStream" computerName="SPAC-38-LTP2347" duration="00:00:00.0316931" startTime="2025-10-15T10:13:06.3241307+02:00" endTime="2025-10-15T10:13:06.3241308+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e7f93c8a-e020-4fbd-97df-906049ba56c9" />
+    <UnitTestResult executionId="22b33431-b37f-41b8-ada1-a3a353157d72" testId="e1c1ee38-caa7-aa73-9891-28eff5d66276" testName="PdfDownloader.Tests.Unit.AppOptionsTests.NoSkipExisting_Flag_Disables_Skip" computerName="SPAC-38-LTP2347" duration="00:00:00.0001157" startTime="2025-10-15T10:13:06.3117359+02:00" endTime="2025-10-15T10:13:06.3117360+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="22b33431-b37f-41b8-ada1-a3a353157d72" />
+    <UnitTestResult executionId="6ffa6f6f-32ca-44f5-a09b-0a7c73192d23" testId="7aa33c9c-66d7-f99b-4977-755717606dfc" testName="PdfDownloader.Tests.Unit.DownloadManagerTests.KeepOldOnChange_Renames_Old_File" computerName="SPAC-38-LTP2347" duration="00:00:00.0145634" startTime="2025-10-15T10:13:07.0731675+02:00" endTime="2025-10-15T10:13:07.0731676+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6ffa6f6f-32ca-44f5-a09b-0a7c73192d23" />
+    <UnitTestResult executionId="d39a6ed2-a534-4799-8ca5-1e58ef2c1a82" testId="e38cbe26-0f43-ebc7-eb65-b144847c7876" testName="PdfDownloader.Tests.Unit.DownloadManagerTests.OverwriteDownloads_True_With_KeepOldOnChange_Renames_Old_File" computerName="SPAC-38-LTP2347" duration="00:00:00.0515423" startTime="2025-10-15T10:13:07.0465903+02:00" endTime="2025-10-15T10:13:07.0465907+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d39a6ed2-a534-4799-8ca5-1e58ef2c1a82" />
+    <UnitTestResult executionId="57b04cb5-d8ae-4090-8c9f-0f4ee5dfb0d0" testId="92b7bb56-1f64-f7e3-a555-0c26e0846567" testName="PdfDownloader.Tests.Unit.AppOptionsTests.KeepOldOnChange_Is_Implied_By_OverwriteDownloads" computerName="SPAC-38-LTP2347" duration="00:00:00.0001624" startTime="2025-10-15T10:13:06.3120682+02:00" endTime="2025-10-15T10:13:06.3120682+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="57b04cb5-d8ae-4090-8c9f-0f4ee5dfb0d0" />
+    <UnitTestResult executionId="2cb042cf-a9db-48d6-9dd6-b2c8e33237a0" testId="d1b92a75-058e-e808-db2a-ae79f996c578" testName="PdfDownloader.Tests.Integration.ExcelIntegrationTests.MetadataLoader_reads_real_excel_and_maps_BRnum_and_PdfURL" computerName="SPAC-38-LTP2347" duration="00:00:07.6531416" startTime="2025-10-15T10:13:13.9437350+02:00" endTime="2025-10-15T10:13:13.9437354+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2cb042cf-a9db-48d6-9dd6-b2c8e33237a0" />
+    <UnitTestResult executionId="b99f549e-5aa5-4bbb-ad86-04f9c24cc0b3" testId="13c37515-4be9-6815-573b-5b259c457442" testName="PdfDownloader.Tests.Unit.MetadataLoaderTests.Load_From_Excel_Maps_Headers_CaseInsensitive" computerName="SPAC-38-LTP2347" duration="00:00:00.9051162" startTime="2025-10-15T10:13:07.1953607+02:00" endTime="2025-10-15T10:13:07.1953615+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b99f549e-5aa5-4bbb-ad86-04f9c24cc0b3" />
+    <UnitTestResult executionId="9ca6305a-9f71-4bb0-930e-8c2e9ea50b5f" testId="24ca141c-ca0f-7f78-e50d-b5bdb3ff611d" testName="PdfDownloader.Tests.Unit.DownloadManagerTests.DetectChanges_Overwrites_When_Changed_Even_Without_OverwriteDownloads" computerName="SPAC-38-LTP2347" duration="00:00:00.0110074" startTime="2025-10-15T10:13:07.0580640+02:00" endTime="2025-10-15T10:13:07.0580641+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9ca6305a-9f71-4bb0-930e-8c2e9ea50b5f" />
+    <UnitTestResult executionId="49a72abd-5c36-46ed-89f7-a35ee2826553" testId="09012306-059e-edf0-ffc8-1dcfcdcddbef" testName="PdfDownloader.Tests.Unit.DownloadManagerTests.NonPdf_ContentType_Surfaces_As_ContentType_Reason" computerName="SPAC-38-LTP2347" duration="00:00:00.0012408" startTime="2025-10-15T10:13:06.3441822+02:00" endTime="2025-10-15T10:13:06.3441823+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="49a72abd-5c36-46ed-89f7-a35ee2826553" />
+    <UnitTestResult executionId="27281d8f-2dff-4fc5-a4cf-4fcebd94244c" testId="96ccc52a-7b8f-7f0a-fc3d-929a9a648153" testName="PdfDownloader.Tests.Unit.DownloadManagerTests.Respects_MaxConcurrency" computerName="SPAC-38-LTP2347" duration="00:00:00.6655219" startTime="2025-10-15T10:13:06.9945948+02:00" endTime="2025-10-15T10:13:06.9945949+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="27281d8f-2dff-4fc5-a4cf-4fcebd94244c" />
+    <UnitTestResult executionId="f45db23f-6ef2-49c0-a12c-e0afa718785b" testId="4b56d6fc-ad65-8dc8-e6fc-dcbbfe496b4f" testName="PdfDownloader.Tests.Unit.AppOptionsTests.Parse_MutuallyExclusive_StatusFlags" computerName="SPAC-38-LTP2347" duration="00:00:00.0070320" startTime="2025-10-15T10:13:06.3138980+02:00" endTime="2025-10-15T10:13:06.3138982+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f45db23f-6ef2-49c0-a12c-e0afa718785b" />
+    <UnitTestResult executionId="943b2331-d172-47d1-a270-55ab1adefcb5" testId="133de07d-5563-15a9-7cb1-97c8e6c9c09b" testName="PdfDownloader.Tests.Unit.DownloadManagerTests.NoUrl_Results_In_NoUrl_Outcome" computerName="SPAC-38-LTP2347" duration="00:00:00.0022585" startTime="2025-10-15T10:13:06.3437649+02:00" endTime="2025-10-15T10:13:06.3437651+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="943b2331-d172-47d1-a270-55ab1adefcb5" />
+    <UnitTestResult executionId="12bfd6b5-bf63-437a-a850-ebeb2746536f" testId="1bca1571-7063-f8b2-5962-057f44d8a906" testName="PdfDownloader.Tests.Unit.DownloadManagerTests.SkipExisting_When_NoOverwrite_And_NoChange" computerName="SPAC-38-LTP2347" duration="00:00:00.0076082" startTime="2025-10-15T10:13:07.0812882+02:00" endTime="2025-10-15T10:13:07.0812884+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="12bfd6b5-bf63-437a-a850-ebeb2746536f" />
+    <UnitTestResult executionId="915debc6-c42c-400d-b055-72df2e365ad2" testId="e469e520-9f06-ee3c-a70e-b5ba3c7dbf94" testName="PdfDownloader.Tests.Unit.MetadataLoaderTests.Load_From_Csv_With_Fallback" computerName="SPAC-38-LTP2347" duration="00:00:00.0284828" startTime="2025-10-15T10:13:07.2242352+02:00" endTime="2025-10-15T10:13:07.2242356+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="915debc6-c42c-400d-b055-72df2e365ad2" />
+    <UnitTestResult executionId="97ede30c-d5aa-414f-95f3-f847a9028d9d" testId="a769e035-58b3-1a0c-c7e6-71a2928b0382" testName="PdfDownloader.Tests.Unit.AppOptionsTests.Parse_Defaults_And_Basics" computerName="SPAC-38-LTP2347" duration="00:00:00.0027271" startTime="2025-10-15T10:13:06.3109475+02:00" endTime="2025-10-15T10:13:06.3109476+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="97ede30c-d5aa-414f-95f3-f847a9028d9d" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PdfDownloader.Tests.Unit.DownloadManagerTests.KeepOldOnChange_Renames_Old_File" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="7aa33c9c-66d7-f99b-4977-755717606dfc">
+      <Execution id="6ffa6f6f-32ca-44f5-a09b-0a7c73192d23" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.DownloadManagerTests" name="KeepOldOnChange_Renames_Old_File" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.DownloadManagerTests.NoUrl_Results_In_NoUrl_Outcome" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="133de07d-5563-15a9-7cb1-97c8e6c9c09b">
+      <Execution id="943b2331-d172-47d1-a270-55ab1adefcb5" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.DownloadManagerTests" name="NoUrl_Results_In_NoUrl_Outcome" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.AppOptionsTests.NoSkipExisting_Flag_Disables_Skip" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="e1c1ee38-caa7-aa73-9891-28eff5d66276">
+      <Execution id="22b33431-b37f-41b8-ada1-a3a353157d72" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.AppOptionsTests" name="NoSkipExisting_Flag_Disables_Skip" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Integration.ExcelIntegrationTests.MetadataLoader_reads_real_excel_and_maps_BRnum_and_PdfURL" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="d1b92a75-058e-e808-db2a-ae79f996c578">
+      <Execution id="2cb042cf-a9db-48d6-9dd6-b2c8e33237a0" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Integration.ExcelIntegrationTests" name="MetadataLoader_reads_real_excel_and_maps_BRnum_and_PdfURL" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.DownloadManagerTests.NonPdf_ContentType_Surfaces_As_ContentType_Reason" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="09012306-059e-edf0-ffc8-1dcfcdcddbef">
+      <Execution id="49a72abd-5c36-46ed-89f7-a35ee2826553" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.DownloadManagerTests" name="NonPdf_ContentType_Surfaces_As_ContentType_Reason" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.DownloadManagerTests.DetectChanges_Overwrites_When_Changed_Even_Without_OverwriteDownloads" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="24ca141c-ca0f-7f78-e50d-b5bdb3ff611d">
+      <Execution id="9ca6305a-9f71-4bb0-930e-8c2e9ea50b5f" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.DownloadManagerTests" name="DetectChanges_Overwrites_When_Changed_Even_Without_OverwriteDownloads" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.AppOptionsTests.Parse_Defaults_And_Basics" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="a769e035-58b3-1a0c-c7e6-71a2928b0382">
+      <Execution id="97ede30c-d5aa-414f-95f3-f847a9028d9d" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.AppOptionsTests" name="Parse_Defaults_And_Basics" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.DownloadManagerTests.Skips_NonPdf_ContentType_Except_OctetStream" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="1b6a6beb-8457-8bde-cee2-301957118ec9">
+      <Execution id="e7f93c8a-e020-4fbd-97df-906049ba56c9" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.DownloadManagerTests" name="Skips_NonPdf_ContentType_Except_OctetStream" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.AppOptionsTests.KeepOldOnChange_Is_Implied_By_OverwriteDownloads" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="92b7bb56-1f64-f7e3-a555-0c26e0846567">
+      <Execution id="57b04cb5-d8ae-4090-8c9f-0f4ee5dfb0d0" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.AppOptionsTests" name="KeepOldOnChange_Is_Implied_By_OverwriteDownloads" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.MetadataLoaderTests.Load_From_Excel_Maps_Headers_CaseInsensitive" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="13c37515-4be9-6815-573b-5b259c457442">
+      <Execution id="b99f549e-5aa5-4bbb-ad86-04f9c24cc0b3" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.MetadataLoaderTests" name="Load_From_Excel_Maps_Headers_CaseInsensitive" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Integration.PipelineIntegrationTests.Csv_to_statusfile_roundtrip_smoke" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="a240b2d3-5d47-ad7d-4599-a7b6dd81c30b">
+      <Execution id="76727379-6748-47fe-b1a8-9cebdfcaca63" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Integration.PipelineIntegrationTests" name="Csv_to_statusfile_roundtrip_smoke" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.DownloadManagerTests.Respects_MaxConcurrency" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="96ccc52a-7b8f-7f0a-fc3d-929a9a648153">
+      <Execution id="27281d8f-2dff-4fc5-a4cf-4fcebd94244c" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.DownloadManagerTests" name="Respects_MaxConcurrency" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.DownloadManagerTests.Timeout_Is_Reported_As_Failed_With_Timeout_Message" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="2369fdd2-0552-c370-b267-a36db94d8b72">
+      <Execution id="413a4867-e844-4363-b256-ad54ff8b3975" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.DownloadManagerTests" name="Timeout_Is_Reported_As_Failed_With_Timeout_Message" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.DownloadManagerTests.OverwriteDownloads_True_With_KeepOldOnChange_Renames_Old_File" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="e38cbe26-0f43-ebc7-eb65-b144847c7876">
+      <Execution id="d39a6ed2-a534-4799-8ca5-1e58ef2c1a82" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.DownloadManagerTests" name="OverwriteDownloads_True_With_KeepOldOnChange_Renames_Old_File" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.DownloadManagerTests.SkipExisting_When_NoOverwrite_And_NoChange" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="1bca1571-7063-f8b2-5962-057f44d8a906">
+      <Execution id="12bfd6b5-bf63-437a-a850-ebeb2746536f" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.DownloadManagerTests" name="SkipExisting_When_NoOverwrite_And_NoChange" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.AppOptionsTests.Unknown_Extension_Throws" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="ab72640d-1e8d-a7b8-41f6-ab778e15d563">
+      <Execution id="3c609f07-286b-4938-9130-2b4e5b4ff732" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.AppOptionsTests" name="Unknown_Extension_Throws" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.MetadataLoaderTests.Load_From_Csv_With_Fallback" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="e469e520-9f06-ee3c-a70e-b5ba3c7dbf94">
+      <Execution id="915debc6-c42c-400d-b055-72df2e365ad2" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.MetadataLoaderTests" name="Load_From_Csv_With_Fallback" />
+    </UnitTest>
+    <UnitTest name="PdfDownloader.Tests.Unit.AppOptionsTests.Parse_MutuallyExclusive_StatusFlags" storage="c:\users\johngrandtmarkvardhø\desktop\opgaver\uge 4 &amp; 5\opgave-1-pdf-downloader\tests\pdfdownloader.tests\bin\release\net9.0\pdfdownloader.tests.dll" id="4b56d6fc-ad65-8dc8-e6fc-dcbbfe496b4f">
+      <Execution id="f45db23f-6ef2-49c0-a12c-e0afa718785b" />
+      <TestMethod codeBase="C:\Users\JohnGrandtMarkvardHø\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\PdfDownloader.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="PdfDownloader.Tests.Unit.AppOptionsTests" name="Parse_MutuallyExclusive_StatusFlags" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="ab72640d-1e8d-a7b8-41f6-ab778e15d563" executionId="3c609f07-286b-4938-9130-2b4e5b4ff732" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2369fdd2-0552-c370-b267-a36db94d8b72" executionId="413a4867-e844-4363-b256-ad54ff8b3975" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a240b2d3-5d47-ad7d-4599-a7b6dd81c30b" executionId="76727379-6748-47fe-b1a8-9cebdfcaca63" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1b6a6beb-8457-8bde-cee2-301957118ec9" executionId="e7f93c8a-e020-4fbd-97df-906049ba56c9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e1c1ee38-caa7-aa73-9891-28eff5d66276" executionId="22b33431-b37f-41b8-ada1-a3a353157d72" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7aa33c9c-66d7-f99b-4977-755717606dfc" executionId="6ffa6f6f-32ca-44f5-a09b-0a7c73192d23" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e38cbe26-0f43-ebc7-eb65-b144847c7876" executionId="d39a6ed2-a534-4799-8ca5-1e58ef2c1a82" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="92b7bb56-1f64-f7e3-a555-0c26e0846567" executionId="57b04cb5-d8ae-4090-8c9f-0f4ee5dfb0d0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d1b92a75-058e-e808-db2a-ae79f996c578" executionId="2cb042cf-a9db-48d6-9dd6-b2c8e33237a0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="13c37515-4be9-6815-573b-5b259c457442" executionId="b99f549e-5aa5-4bbb-ad86-04f9c24cc0b3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="24ca141c-ca0f-7f78-e50d-b5bdb3ff611d" executionId="9ca6305a-9f71-4bb0-930e-8c2e9ea50b5f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="09012306-059e-edf0-ffc8-1dcfcdcddbef" executionId="49a72abd-5c36-46ed-89f7-a35ee2826553" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="96ccc52a-7b8f-7f0a-fc3d-929a9a648153" executionId="27281d8f-2dff-4fc5-a4cf-4fcebd94244c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4b56d6fc-ad65-8dc8-e6fc-dcbbfe496b4f" executionId="f45db23f-6ef2-49c0-a12c-e0afa718785b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="133de07d-5563-15a9-7cb1-97c8e6c9c09b" executionId="943b2331-d172-47d1-a270-55ab1adefcb5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1bca1571-7063-f8b2-5962-057f44d8a906" executionId="12bfd6b5-bf63-437a-a850-ebeb2746536f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e469e520-9f06-ee3c-a70e-b5ba3c7dbf94" executionId="915debc6-c42c-400d-b055-72df2e365ad2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a769e035-58b3-1a0c-c7e6-71a2928b0382" executionId="97ede30c-d5aa-414f-95f3-f847a9028d9d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="18" executed="18" passed="18" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 9.0.9)&#xD;
+[xUnit.net 00:00:00.49]   Discovering: PdfDownloader.Tests&#xD;
+[xUnit.net 00:00:00.52]   Discovered:  PdfDownloader.Tests&#xD;
+[xUnit.net 00:00:00.52]   Starting:    PdfDownloader.Tests&#xD;
+RUN START: 2025-10-15 10:13:06&#xD;
+RUN START: 2025-10-15 10:13:06&#xD;
+Input: C:\Users\JohnGrandtMarkvardH�\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\samples\GRI_2017_2020 (1).xlsx&#xD;
+Input: C:\Users\JohnGrandtMarkvardH�\Desktop\Opgaver\Uge 4 &amp; 5\Opgave-1-PDF-Downloader\tests\PdfDownloader.Tests\bin\Release\net9.0\samples\Metadata2006_2016.xlsx&#xD;
+Output: C:\Users\JohnGrandtMarkvardH�\AppData\Local\Temp\pdf-out-bb8e2143-d6f1-4d45-9861-d3d9a5fc934a&#xD;
+Status CSV: C:\Users\JohnGrandtMarkvardH�\AppData\Local\Temp\pdf-out-bb8e2143-d6f1-4d45-9861-d3d9a5fc934a\status.csv&#xD;
+Output: C:\Users\JohnGrandtMarkvardH�\AppData\Local\Temp\pipe-7c1f34ad-7cad-4837-9082-482b524fff16&#xD;
+Status CSV: C:\Users\JohnGrandtMarkvardH�\AppData\Local\Temp\pipe-7c1f34ad-7cad-4837-9082-482b524fff16\status.csv&#xD;
+Max concurrency: 3&#xD;
+Max concurrency: 4&#xD;
+Limit: 5&#xD;
+Limit: 5&#xD;
+[START] BadThenOk - Klarg�r&#xD;
+[UPDATE] BadThenOk [00:00] - Henter (headers)...&#xD;
+[UPDATE] BadThenOk [00:00] - Content-Type: text/html - skipper&#xD;
+[UPDATE] BadThenOk [00:00] - Henter (headers)...&#xD;
+[UPDATE] BadThenOk [00:00] - Downloader indhold...&#xD;
+[OK] BadThenOk (00:00) - PDF gemt korrekt&#xD;
+[START] X1 - Klarg�r&#xD;
+[MISS] X1 (00:00) - Mangler gyldig URL i metadata - No URL&#xD;
+[START] C - Klarg�r&#xD;
+[UPDATE] C [00:00] - Henter (headers)...&#xD;
+[UPDATE] C [00:00] - Content-Type: text/html - skipper&#xD;
+[FAIL] C (00:00) - Fejl (HTTP, IO, timeout, forkert content-type) - Content-Type: text/html&#xD;
+[START] X1 - Klarg�r&#xD;
+[UPDATE] X1 [00:00] - Henter (headers)...&#xD;
+[START] X2 - Klarg�r&#xD;
+[UPDATE] X2 [00:00] - Henter (headers)...&#xD;
+[START] X3 - Klarg�r&#xD;
+[UPDATE] X3 [00:00] - Henter (headers)...&#xD;
+[UPDATE] X2 [00:00] - Downloader indhold...&#xD;
+[UPDATE] X3 [00:00] - Downloader indhold...&#xD;
+[UPDATE] X1 [00:00] - Downloader indhold...&#xD;
+[OK] X3 (00:00) - PDF gemt korrekt&#xD;
+[OK] X1 (00:00) - PDF gemt korrekt&#xD;
+[OK] X2 (00:00) - PDF gemt korrekt&#xD;
+[START] X4 - Klarg�r&#xD;
+[START] X6 - Klarg�r&#xD;
+[UPDATE] X6 [00:00] - Henter (headers)...&#xD;
+[UPDATE] X4 [00:00] - Henter (headers)...&#xD;
+[START] X5 - Klarg�r&#xD;
+[UPDATE] X5 [00:00] - Henter (headers)...&#xD;
+[UPDATE] X5 [00:00] - Downloader indhold...&#xD;
+[UPDATE] X6 [00:00] - Downloader indhold...&#xD;
+[UPDATE] X4 [00:00] - Downloader indhold...&#xD;
+[OK] X5 (00:00) - PDF gemt korrekt&#xD;
+[START] X7 - Klarg�r&#xD;
+[UPDATE] X7 [00:00] - Henter (headers)...&#xD;
+[OK] X4 (00:00) - PDF gemt korrekt&#xD;
+[START] X8 - Klarg�r&#xD;
+[OK] X6 (00:00) - PDF gemt korrekt&#xD;
+[UPDATE] X8 [00:00] - Henter (headers)...&#xD;
+[START] X9 - Klarg�r&#xD;
+[UPDATE] X9 [00:00] - Henter (headers)...&#xD;
+[UPDATE] X9 [00:00] - Downloader indhold...&#xD;
+[UPDATE] X8 [00:00] - Downloader indhold...&#xD;
+[UPDATE] X7 [00:00] - Downloader indhold...&#xD;
+[OK] X8 (00:00) - PDF gemt korrekt&#xD;
+[START] X10 - Klarg�r&#xD;
+[UPDATE] X10 [00:00] - Henter (headers)...&#xD;
+[OK] X9 (00:00) - PDF gemt korrekt&#xD;
+[START] X11 - Klarg�r&#xD;
+[OK] X7 (00:00) - PDF gemt korrekt&#xD;
+[UPDATE] X11 [00:00] - Henter (headers)...&#xD;
+[START] X12 - Klarg�r&#xD;
+[UPDATE] X12 [00:00] - Henter (headers)...&#xD;
+[UPDATE] X11 [00:00] - Downloader indhold...&#xD;
+[UPDATE] X12 [00:00] - Downloader indhold...&#xD;
+[UPDATE] X10 [00:00] - Downloader indhold...&#xD;
+[OK] X12 (00:00) - PDF gemt korrekt&#xD;
+[OK] X11 (00:00) - PDF gemt korrekt&#xD;
+[OK] X10 (00:00) - PDF gemt korrekt&#xD;
+[START] A - Klarg�r&#xD;
+[UPDATE] A [00:00] - Henter (headers)...&#xD;
+[UPDATE] A [00:00] - Downloader indhold...&#xD;
+[OK] A (00:00) - PDF gemt korrekt&#xD;
+[START] A - Klarg�r&#xD;
+[UPDATE] A [00:00] - Henter (headers)...&#xD;
+[UPDATE] A [00:00] - Downloader indhold...&#xD;
+[OK] A (00:00) - PDF gemt korrekt&#xD;
+[START] A - Klarg�r&#xD;
+[UPDATE] A [00:00] - Henter (headers)...&#xD;
+[UPDATE] A [00:00] - Downloader indhold...&#xD;
+[OK] A (00:00) - PDF gemt korrekt&#xD;
+[START] A/\:*?"&lt;&gt;| - Klarg�r&#xD;
+[UPDATE] A/\:*?"&lt;&gt;| [00:00] - Henter (headers)...&#xD;
+[UPDATE] A/\:*?"&lt;&gt;| [00:00] - Downloader indhold...&#xD;
+[OK] A/\:*?"&lt;&gt;| (00:00) - PDF gemt korrekt&#xD;
+[START] A/\:*?"&lt;&gt;| - Klarg�r&#xD;
+[UPDATE] A/\:*?"&lt;&gt;| [00:00] - Henter (headers)...&#xD;
+[UPDATE] A/\:*?"&lt;&gt;| [00:00] - Downloader indhold...&#xD;
+[SKIP] A/\:*?"&lt;&gt;| (00:00) - Filen findes allerede - No change detected&#xD;
+[START] T - Klarg�r&#xD;
+[UPDATE] T [00:00] - Henter (headers)...&#xD;
+[UPDATE] T [00:00] - Timeout - pr�ver n�ste&#xD;
+[FAIL] T (00:00) - Fejl (HTTP, IO, timeout, forkert content-type) - Timeout&#xD;
+[START] BR50041 - Klarg�r&#xD;
+[UPDATE] BR50041 [00:00] - Henter (headers)...&#xD;
+[START] BR50042 - Klarg�r&#xD;
+[UPDATE] BR50042 [00:00] - Henter (headers)...&#xD;
+[START] BR50043 - Klarg�r&#xD;
+[UPDATE] BR50043 [00:00] - Henter (headers)...&#xD;
+[UPDATE] BR50043 [00:00] - HTTP 403 - pr�ver n�ste&#xD;
+[FAIL] BR50043 (00:00) - Fejl (HTTP, IO, timeout, forkert content-type) - HTTP 403&#xD;
+[START] BR50044 - Klarg�r&#xD;
+[UPDATE] BR50044 [00:00] - Henter (headers)...&#xD;
+[UPDATE] BR50044 [00:00] - Fejl - pr�ver n�ste URL&#xD;
+[FAIL] BR50044 (00:00) - Fejl (HTTP, IO, timeout, forkert content-type) - Exception: NotSupportedException&#xD;
+[START] BR50045 - Klarg�r&#xD;
+[UPDATE] BR50045 [00:00] - Henter (headers)...&#xD;
+[UPDATE] BR50041 [00:00] - Content-Type: text/html - skipper&#xD;
+[FAIL] BR50041 (00:00) - Fejl (HTTP, IO, timeout, forkert content-type) - Content-Type: text/html&#xD;
+[UPDATE] BR50042 [00:00] - Downloader indhold...&#xD;
+[UPDATE] BR50045 [00:00] - Downloader indhold...&#xD;
+[OK] BR50045 (00:00) - PDF gemt korrekt&#xD;
+[OK] BR50042 (00:02) - PDF gemt korrekt&#xD;
+Opsummering (denne k�rsel):&#xD;
+  Hentet: 2&#xD;
+  Skippet (allerede hentet/ingen �ndring): 0&#xD;
+  Fejlet: 3&#xD;
+  Ingen URL: 0&#xD;
+  Fejl fordelt:&#xD;
+    - Content-Type: text/html: 1&#xD;
+    - Exception: NotSupportedException: 1&#xD;
+    - HTTP 403: 1&#xD;
+Statusrapport appendet i C:\Users\JohnGrandtMarkvardH�\AppData\Local\Temp\pdf-out-bb8e2143-d6f1-4d45-9861-d3d9a5fc934a\status.csv&#xD;
+Tr�dstatistik (gennemsnit pr. tr�d):&#xD;
+  Tr�d #1: jobs=1, total=00:00, avg=00:00&#xD;
+  Tr�d #2: jobs=1, total=00:02, avg=00:02&#xD;
+  Tr�d #3: jobs=3, total=00:01, avg=00:00&#xD;
+RUN END: 2025-10-15 10:13:13 (varighed: 0:00:07,6298883)&#xD;
+[START] BR9158 - Klarg�r&#xD;
+[UPDATE] BR9158 [00:00] - Henter (headers)...&#xD;
+[START] BR9159 - Klarg�r&#xD;
+[UPDATE] BR9159 [00:00] - Henter (headers)...&#xD;
+[START] BR9160 - Klarg�r&#xD;
+[UPDATE] BR9160 [00:00] - Henter (headers)...&#xD;
+[START] BR9161 - Klarg�r&#xD;
+[UPDATE] BR9161 [00:00] - Henter (headers)...&#xD;
+[UPDATE] BR9160 [00:01] - Downloader indhold...&#xD;
+[UPDATE] BR9158 [00:01] - Content-Type: text/html - skipper&#xD;
+[FAIL] BR9158 (00:01) - Fejl (HTTP, IO, timeout, forkert content-type) - Content-Type: text/html&#xD;
+[START] BR9162 - Klarg�r&#xD;
+[UPDATE] BR9162 [00:00] - Henter (headers)...&#xD;
+[UPDATE] BR9162 [00:00] - Fejl - pr�ver n�ste URL&#xD;
+[FAIL] BR9162 (00:00) - Fejl (HTTP, IO, timeout, forkert content-type) - Exception: HttpRequestException&#xD;
+[UPDATE] BR9159 [00:01] - Content-Type: text/html - skipper&#xD;
+[FAIL] BR9159 (00:01) - Fejl (HTTP, IO, timeout, forkert content-type) - Content-Type: text/html&#xD;
+[UPDATE] BR9161 [00:01] - Content-Type: text/html - skipper&#xD;
+[FAIL] BR9161 (00:01) - Fejl (HTTP, IO, timeout, forkert content-type) - Content-Type: text/html&#xD;
+[OK] BR9160 (00:02) - PDF gemt korrekt&#xD;
+Opsummering (denne k�rsel):&#xD;
+  Hentet: 1&#xD;
+  Skippet (allerede hentet/ingen �ndring): 0&#xD;
+  Fejlet: 4&#xD;
+  Ingen URL: 0&#xD;
+  Fejl fordelt:&#xD;
+    - Content-Type: text/html: 3&#xD;
+    - Exception: HttpRequestException: 1&#xD;
+Statusrapport appendet i C:\Users\JohnGrandtMarkvardH�\AppData\Local\Temp\pipe-7c1f34ad-7cad-4837-9082-482b524fff16\status.csv&#xD;
+Tr�dstatistik (gennemsnit pr. tr�d):&#xD;
+  Tr�d #1: jobs=2, total=00:01, avg=00:00&#xD;
+  Tr�d #2: jobs=1, total=00:01, avg=00:01&#xD;
+  Tr�d #3: jobs=1, total=00:02, avg=00:02&#xD;
+  Tr�d #4: jobs=1, total=00:01, avg=00:01&#xD;
+RUN END: 2025-10-15 10:13:17 (varighed: 0:00:10,9307398)&#xD;
+[xUnit.net 00:00:11.50]   Finished:    PdfDownloader.Tests&#xD;
+</StdOut>
+    </Output>
+    <CollectorDataEntries>
+      <Collector agentName="SPAC-38-LTP2347" uri="datacollector://microsoft/CoverletCodeCoverage/1.0" collectorDisplayName="XPlat code coverage">
+        <UriAttachments>
+          <UriAttachment>
+            <A href="SPAC-38-LTP2347\coverage.cobertura.xml"></A>
+          </UriAttachment>
+        </UriAttachments>
+      </Collector>
+    </CollectorDataEntries>
+  </ResultSummary>
+</TestRun>

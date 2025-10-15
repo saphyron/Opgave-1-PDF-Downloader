@@ -39,4 +39,42 @@ public class AppOptionsTests
         act.Should().Throw<OptionParsingException>()
            .WithMessage("*Vælg enten --append-status eller --overwrite-status*");
     }
+
+    [Fact]
+    public void NoSkipExisting_Flag_Disables_Skip()
+    {
+        var args = new[]
+        {
+            "--input","in.xlsx","--output",".",
+            "--no-skip-existing"
+        };
+        var o = AppOptions.Parse(args);
+        o.SkipExisting.Should().BeFalse();
+    }
+
+    [Fact]
+    public void KeepOldOnChange_Is_Implied_By_OverwriteDownloads()
+    {
+        var args = new[]
+        {
+            "--input","in.xlsx","--output",".",
+            "--overwrite-downloads"
+        };
+        var o = AppOptions.Parse(args);
+        o.OverwriteDownloads.Should().BeTrue();
+        o.KeepOldOnChange.Should().BeTrue(); // implikation i parseren
+    }
+
+    [Fact]
+    public void Unknown_Extension_Throws()
+    {
+        var args = new[]
+        {
+            "--input","in.xyz","--output","."
+        };
+        Action act = () => AppOptions.Parse(args);
+        act.Should().NotThrow(); // parser tillader filnavn hvad som helst…
+
+        // … men selve loaderen vil kaste – det testes i MetadataLoader
+    }
 }

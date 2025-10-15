@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$SolutionPath = ".\PdfDownloader.sln",
   [string]$TestsProject = ".\tests\PdfDownloader.Tests\PdfDownloader.Tests.csproj",
   [string]$OutDir       = ".\docs\test-reports",
@@ -8,6 +8,30 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# --- Ensartet UTF-8 (konsol + default fil-encodings) ---
+try { chcp 65001 > $null } catch {}
+$OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::new()
+$PSDefaultParameterValues['Out-File:Encoding']    = 'utf8BOM'
+$PSDefaultParameterValues['Set-Content:Encoding'] = 'utf8BOM'
+$PSDefaultParameterValues['Add-Content:Encoding'] = 'utf8BOM'
+$Utf8BOM = [Text.UTF8Encoding]::new($true)
+
+# ================  Forberedelse  ================
+$stamp      = Get-Date -Format "yyyy-MM-dd_HHmmss"
+$sessionDir = Join-Path $env:TEMP ("pdfd-tests-" + $stamp)
+
+if (-not (Test-Path -LiteralPath $OutDir)) { New-Item -ItemType Directory -Force -Path $OutDir | Out-Null }
+$runDir = Join-Path $OutDir $stamp
+if (-not (Test-Path -LiteralPath $runDir)) { New-Item -ItemType Directory -Force -Path $runDir | Out-Null }
+
+$newReport = Join-Path $runDir "TestReport.md"
+if (-not (Test-Path -LiteralPath $sessionDir)) { New-Item -ItemType Directory -Force -Path $sessionDir | Out-Null }
+
+# --- Transcript i run-mappen (PS 5.1 → UTF-16; konverteres til sidst) ---
+$RawTranscript = Join-Path $runDir "session.transcript.log"
+$FinalLog      = Join-Path $runDir "Run.log"
+Start-Transcript -Path $RawTranscript -Force | Out-Null
 
 # =========================
 #  Hjælpefunktioner (PS 5.1)
@@ -19,6 +43,7 @@ function Get-Expectation-And-Description {
   $n = [string]$fullName
   $n = $n.ToLowerInvariant()
 
+  # Kendte tests
   if ($n -like "*statusreporttests*write*read*roundtrip*") {
     return @{ Expected="Rapportfilen skrives og kan læses igen uden datatab."
               Description="Roundtrip af status-CSV (resume + revision)." }
@@ -51,6 +76,37 @@ function Get-Expectation-And-Description {
     return @{ Expected="End-to-end: metadata læses, nogle PDF'er hentes, status-CSV skrives."
               Description="Hele ruten fra metadata til statusrapport." }
   }
+
+  # Ekstra dæknings-patterns (nye/helpere)
+  if ($n -like "*metadatarecord_extrastests*hasanyurl*orderedurls*") {
+    return @{ Expected="Detekterer korrekt om der findes en URL og returnerer (primær, fallback) i rækkefølge."
+              Description="Unit test af MetadataRecord.HasAnyUrl og GetOrderedUrls()." }
+  }
+  if ($n -like "*downloadmanager_nourltests*nourl*yields*nourl*") {
+    return @{ Expected="Rækker uden URL markeres som NoUrl med beskeden 'No URL'."
+              Description="Validerer korrekt outcome ved manglende URL." }
+  }
+  if ($n -like "*downloadmanager_timeouttests*timeout*reported*") {
+    return @{ Expected="HTTP-timeout rapporteres som 'Timeout' og outcome=Failed."
+              Description="Mapning af TaskCanceledException til Timeout." }
+  }
+  if ($n -like "*downloadmanager_keepoldonchangetests*changed*renames*") {
+    return @{ Expected="Ved ændret indhold + keep-old-on-change oprettes *.updated*.pdf."
+              Description="Bevarer tidligere version ved overskrivning." }
+  }
+  if ($n -like "*downloadmanager_keepoldonchangetests*overwrite*without*keep*") {
+    return @{ Expected="Ved overskrivning uden 'keep' oprettes ingen *.updated*.pdf."
+              Description="Kun ny fil eksisterer." }
+  }
+  if ($n -like "*statusreportreader_readalltests*readall*handles*reordered*") {
+    return @{ Expected="ReadAll kan læse status-CSV uanset kolonne-rækkefølge og manglende felter."
+              Description="Robust CSV-parsing via navne/indeks fallback." }
+  }
+  if ($n -like "*downloadmanager_slotstatstests*slotstats*counts*all*jobs*") {
+    return @{ Expected="Slot-statistik summerer alle jobs; antal slots matcher maxConcurrency."
+              Description="Verificerer optælling og gennemsnit pr. slot." }
+  }
+
   return @{ Expected="Testen forventes at lykkes uden fejl."
             Description="Tester en del af PDF Downloaderen." }
 }
@@ -77,30 +133,12 @@ function GetOutcomeExplanation {
   }
 }
 
-# ================
-#   Forberedelse
-# ================
-$stamp      = Get-Date -Format "yyyy-MM-dd_HHmmss"
-$sessionDir = Join-Path $env:TEMP ("pdfd-tests-" + $stamp)
-
-# Opret kørselsmappe under OutDir og læg alt dér
-if (-not (Test-Path -LiteralPath $OutDir)) { New-Item -ItemType Directory -Force -Path $OutDir | Out-Null }
-$runDir = Join-Path $OutDir $stamp
-if (-not (Test-Path -LiteralPath $runDir)) { New-Item -ItemType Directory -Force -Path $runDir | Out-Null }
-
-$newReport = Join-Path $runDir "TestReport.md"
-
-if (-not (Test-Path -LiteralPath $sessionDir)) { New-Item -ItemType Directory -Force -Path $sessionDir | Out-Null }
-
-Write-Host "== Restore =="
-dotnet restore $SolutionPath | Out-Host
-
-Write-Host "== Build =="
-dotnet build $SolutionPath -c Release --nologo | Out-Host
+Write-Host "== Restore =="; dotnet restore $SolutionPath | Out-Host
+Write-Host "== Build ==";   dotnet build $SolutionPath -c Release --nologo | Out-Host
 
 Write-Host "== Test + Coverage =="
 
-# Runsettings til XPlat Code Coverage (Cobertura + exclusions)
+# Runsettings til XPlat Code Coverage
 $runSettings = @"
 <RunSettings>
   <DataCollectionRunSettings>
@@ -127,9 +165,7 @@ dotnet test $TestsProject -c Release `
   --collect:"XPlat Code Coverage" `
   --settings $runSettingsPath | Out-Host
 
-# ===================
-#  Find artefakter
-# ===================
+# ===================  Find artefakter  ===================
 $trxFile = Join-Path $sessionDir $trxName
 if (-not (Test-Path -LiteralPath $trxFile)) {
   $trxFound = Get-ChildItem -Recurse -Path $sessionDir -Filter *.trx | Select-Object -First 1
@@ -138,13 +174,8 @@ if (-not (Test-Path -LiteralPath $trxFile)) {
 $covFound = Get-ChildItem -Recurse -Path $sessionDir -Filter "coverage.cobertura.xml" | Select-Object -First 1
 if ($covFound) { $covFile = $covFound.FullName } else { $covFile = $null }
 
-# ====================================
-#  Parse TRX → totaler + test-liste
-# ====================================
-[int]$total = 0
-[int]$passed = 0
-[int]$failed = 0
-[int]$skipped = 0
+# ==========  Parse TRX → totaler + test-liste  ==========
+[int]$total = 0; [int]$passed = 0; [int]$failed = 0; [int]$skipped = 0
 $allTests = @()
 
 if ($trxFile) {
@@ -166,7 +197,7 @@ if ($trxFile) {
         $msg = ($r.Output.ErrorInfo.Message -join " ")
       }
 
-      # slå fuldt navn (klasse.metode) op
+      # Fuld klasse.metode
       $full = $name
       if ($trx.TestRun.TestDefinitions -and $trx.TestRun.TestDefinitions.UnitTest) {
         $match = @($trx.TestRun.TestDefinitions.UnitTest | Where-Object { $_.name -eq $name }) | Select-Object -First 1
@@ -177,11 +208,8 @@ if ($trxFile) {
       }
 
       $ex = Get-Expectation-And-Description -fullName $full
-
-      $sortKey = 0
-      if ($outcome -eq 'Passed') { $sortKey = 1 }  # Fejl/skips først
-
-      $t = New-Object psobject -Property @{
+      $sortKey = 0; if ($outcome -eq 'Passed') { $sortKey = 1 }  # Fejl/skips først
+      $t = [pscustomobject]@{
         Name        = $name
         FullName    = $full
         Outcome     = $outcome
@@ -194,17 +222,12 @@ if ($trxFile) {
       }
       $allTests += $t
     }
-
     $allTests = $allTests | Sort-Object -Property SortKey, Name
   }
 }
 
-# ================================
-#  Parse Cobertura coverage XML
-# ================================
-$linePctText = "N/A"
-$perPackage  = @()
-
+# ==========  Parse Cobertura coverage XML  ==========
+$linePctText = "N/A"; $perPackage  = @()
 if ($covFile) {
   [xml]$cov = Get-Content -LiteralPath $covFile
   $globalRate = $cov.coverage.'line-rate'
@@ -213,14 +236,12 @@ if ($covFile) {
     $linePct  = [Math]::Round($lineRate * 100, 1)
     $linePctText = "$linePct%"
   }
-
   $pkgs = $cov.coverage.packages.package
   if ($pkgs) {
     foreach ($p in $pkgs) {
       $classes = $p.classes.class
       if (-not $classes) { continue }
-      $linesValid = 0
-      $linesCovered = 0
+      $linesValid = 0; $linesCovered = 0
       foreach ($c in $classes) {
         $cLines = $c.lines.line
         if ($cLines) {
@@ -233,7 +254,7 @@ if ($covFile) {
       }
       if ($linesValid -gt 0) {
         $pkgPct = [Math]::Round(($linesCovered / [double]$linesValid) * 100, 1)
-        $perPackage += New-Object psobject -Property @{
+        $perPackage += [pscustomobject]@{
           Package      = $p.name
           Coverage     = ($pkgPct.ToString() + "%")
           LinesCovered = $linesCovered
@@ -245,12 +266,8 @@ if ($covFile) {
   }
 }
 
-# ===========================================
-#  LIVE PRØVE: 20 rækker, concurrency test
-# ===========================================
+# ==========  LIVE PRØVE: 20 rækker, concurrency test  ==========
 Write-Host "== Live prøve (20 rækker) =="
-
-# Forbered temp-stier
 $samplePath = Resolve-Path $SampleExcel
 $serialOut  = Join-Path $sessionDir "dl-serial"
 $parallelOut= Join-Path $sessionDir "dl-parallel"
@@ -260,11 +277,7 @@ $statusPar  = Join-Path $sessionDir "status-parallel.csv"
 foreach ($p in @($serialOut,$parallelOut)) { if (-not (Test-Path $p)) { New-Item -ItemType Directory -Path $p | Out-Null } }
 
 function Invoke-AppRun {
-  param(
-    [int]$MaxConc,
-    [string]$OutDir,
-    [string]$StatusFile
-  )
+  param([int]$MaxConc,[string]$OutDir,[string]$StatusFile)
   $args = @(
     "--input", $samplePath.Path,
     "--output", (Resolve-Path $OutDir).Path,
@@ -288,9 +301,7 @@ $durPar = Invoke-AppRun -MaxConc 5 -OutDir $parallelOut -StatusFile $statusPar
 function Read-Status {
   param([string]$file)
   $rows = @()
-  if (Test-Path -LiteralPath $file) {
-    $rows = Import-Csv -LiteralPath $file
-  }
+  if (Test-Path -LiteralPath $file) { $rows = Import-Csv -LiteralPath $file }
   return ,$rows
 }
 
@@ -314,11 +325,8 @@ function Summarize {
 $serSum = Summarize -rows $serRows
 $parSum = Summarize -rows $parRows
 
-# =======================
-#  Byg Markdown rapport
-# =======================
+# =======================  Byg Markdown rapport  =======================
 $sb = New-Object System.Text.StringBuilder
-
 $null = $sb.AppendLine("# PDF Downloader - Testrapport")
 $null = $sb.AppendLine("")
 $null = $sb.AppendLine("**Dato:** " + (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))
@@ -329,7 +337,6 @@ $null = $sb.AppendLine("## Overblik")
 $null = $sb.AppendLine("- Total tests: **" + $total + "**  |  Passed: **" + $passed + "**  |  Failed: **" + $failed + "**  |  Skipped: **" + $skipped + "**")
 $null = $sb.AppendLine("- Code coverage (line): **" + $linePctText + "**")
 
-# Vi linker til kopier i run-mappen, ikke temp-stier
 $trxOut = Join-Path $runDir "test.trx"
 $covOut = Join-Path $runDir "coverage.cobertura.xml"
 $serOut = Join-Path $runDir "status-serial.csv"
@@ -348,8 +355,7 @@ if ($allTests.Count -gt 0) {
       $shortMsg = $shortMsg -replace "`n"," "
       if ($shortMsg.Length -gt 300) { $shortMsg = $shortMsg.Substring(0,300) + " ..." }
     }
-    $durText = ""
-    if ($t.Duration) { $durText = " (" + $t.Duration + ")" }
+    $durText = ""; if ($t.Duration) { $durText = " (" + $t.Duration + ")" }
 
     $null = $sb.AppendLine("* **" + $t.Name + "**")
     $null = $sb.AppendLine("  - Hvad tester den: " + $t.Description)
@@ -436,14 +442,14 @@ $null = $sb.AppendLine("- Parallel I/O-tuning: bufferstørrelser og CopyToAsync 
 $null = $sb.AppendLine("- Robust kolonne-mapping: valgfri alias-liste for Id/Pdf_URL i MetadataLoader for endnu mere 'live data'-tolerance.")
 $null = $sb.AppendLine("")
 
-# ===================
-#  Skriv/kopier filer
-# ===================
-Set-Content -LiteralPath $newReport -Value $sb.ToString() -Encoding UTF8
+# ===================  Skriv/kopier filer  ===================
+[IO.File]::WriteAllText($newReport, $sb.ToString(), $Utf8BOM)
 
-# Kopier artefakter fra temp ind i run-mappen
+# Kopiér artefakter fra temp-session til run-mappe
 if ($trxFile) { Copy-Item -LiteralPath $trxFile -Destination $trxOut -Force }
 if ($covFile) { Copy-Item -LiteralPath $covFile -Destination $covOut -Force }
+
+# Live-run status-CSV'er
 if (Test-Path $statusSer) { Copy-Item -LiteralPath $statusSer -Destination $serOut -Force }
 if (Test-Path $statusPar) { Copy-Item -LiteralPath $statusPar -Destination $parOut -Force }
 
@@ -454,3 +460,19 @@ if (Test-Path $trxOut) { Write-Host (" - TRX:  " + $trxOut) }
 if (Test-Path $covOut) { Write-Host (" - COV:  " + $covOut) }
 if (Test-Path $serOut) { Write-Host (" - STATUS (seriel):    " + $serOut) }
 if (Test-Path $parOut) { Write-Host (" - STATUS (parallel):  " + $parOut) }
+
+# ----- Stop transcript og konverter til UTF-8 med BOM -----
+try { Stop-Transcript | Out-Null } catch {}
+
+if (Test-Path -LiteralPath $RawTranscript) {
+  try {
+    $rawText = Get-Content -LiteralPath $RawTranscript -Raw -Encoding Unicode
+    [IO.File]::WriteAllText($FinalLog, $rawText, $Utf8BOM)
+  } catch {
+    Write-Warning "Kunne ikke konvertere transcript til UTF-8: $_"
+  } finally {
+    Remove-Item -LiteralPath $RawTranscript -Force -ErrorAction SilentlyContinue
+  }
+}
+
+Write-Host (" - LOG:  " + $FinalLog)

@@ -1,0 +1,21 @@
+Id,Outcome,Message,SourceUrl,SavedFile
+BR50060,Downloaded,,https://www.abc-arbitrage.com/wp-content/uploads/2017/04/20170428-ABCA-VA-Annual-Financial-Report-2016-RFA.pdf,C:\Users\JohnGrandtMarkvardHø\AppData\Local\Temp\pdfd-tests-2025-10-15_101300\dl-serial\BR50060.pdf
+BR50059,Downloaded,,http://www.abc.net.au/corp/annual-report/2017/documents/ABC_AnnualREport-2017_Volume-1.pdf,C:\Users\JohnGrandtMarkvardHø\AppData\Local\Temp\pdfd-tests-2025-10-15_101300\dl-serial\BR50059.pdf
+BR50053,Failed,HTTP 404,,
+BR50061,Failed,HTTP 404,,
+BR50058,Downloaded,,http://dam.abbott.com/en-ie/documents/pdf/2994 Citizenship Report 2016 v15.pdf,C:\Users\JohnGrandtMarkvardHø\AppData\Local\Temp\pdfd-tests-2025-10-15_101300\dl-serial\BR50058.pdf
+BR50056,Failed,HTTP 404,,
+BR50054,Downloaded,,https://www.abancacorporacionbancaria.com/files/documents/memoria-anual-rsc-2016-es.pdf,C:\Users\JohnGrandtMarkvardHø\AppData\Local\Temp\pdfd-tests-2025-10-15_101300\dl-serial\BR50054.pdf
+BR50052,Downloaded,,http://www.ab-science.com/file_bdd/content/1480493978_DDRVF.pdf,C:\Users\JohnGrandtMarkvardHø\AppData\Local\Temp\pdfd-tests-2025-10-15_101300\dl-serial\BR50052.pdf
+BR50051,Failed,Content-Type: text/html,,
+BR50049,Failed,HTTP 406,,
+BR50045,Downloaded,,http://www.hkexnews.hk/listedco/listconews/SEHK/2017/0512/LTN20170512165.pdf,C:\Users\JohnGrandtMarkvardHø\AppData\Local\Temp\pdfd-tests-2025-10-15_101300\dl-serial\BR50045.pdf
+BR50044,Failed,Exception: NotSupportedException,,
+BR50043,Failed,HTTP 403,,
+BR50042,Downloaded,,http://cdn12.a1.net/m/resources/media/pdf/A1-Umwelterkl-rung-2016-2017.pdf,C:\Users\JohnGrandtMarkvardHø\AppData\Local\Temp\pdfd-tests-2025-10-15_101300\dl-serial\BR50042.pdf
+BR50057,Downloaded,,http://dam.abbott.com/en-us/documents/pdfs/abbott-citizenship/2016_Sustainability_Report_LONG_FORM.pdf,C:\Users\JohnGrandtMarkvardHø\AppData\Local\Temp\pdfd-tests-2025-10-15_101300\dl-serial\BR50057.pdf
+BR50055,Downloaded,,https://cdn.cse.lk/cmt/upload_report_file/642_1502793422.pdf,C:\Users\JohnGrandtMarkvardHø\AppData\Local\Temp\pdfd-tests-2025-10-15_101300\dl-serial\BR50055.pdf
+BR50050,Failed,HTTP 404,,
+BR50048,Failed,HTTP 404,,
+BR50047,Downloaded,,http://ebooks.exakta.se/aak/2017/hallbarhetsrapport_2016_2017_en/pubData/source/aak_sustainability_report_2016_2017_ebook.pdf,C:\Users\JohnGrandtMarkvardHø\AppData\Local\Temp\pdfd-tests-2025-10-15_101300\dl-serial\BR50047.pdf
+BR50041,Failed,Content-Type: text/html,,
