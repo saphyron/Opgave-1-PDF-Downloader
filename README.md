@@ -335,16 +335,16 @@ Krav: .NET 9 SDK.
 
 
 ```powershell
-dotnet restore
-dotnet build -c Release
-dotnet test -c Release --settings .runsettings --collect "XPlat Code Coverage"
+powershell -ExecutionPolicy Bypass -File ".\scripts\TestReport.ps1
 ```
 
-### Dokumentation & DX
-
-- **Manpages/Help**: `--help` med eksempelscenarier (resume, range, overwrite)
-- **Konfigfil** (`.yml`/`.json`) med navngivne profiler: `--profile office-net`, `--profile home-fast`
-- **Eksempel-scripts**: PowerShell/Bash med typiske flows (resume ranges, retries, reports)
+#### Rapport skabes i docs/test-reports/<datatime>/
+- Der skabes 2 filer der bruges af Rapporten.
+  - coverage.cobertura.xml
+  - test.trx
+- Der skabes 2 status.csv filer, der afspejler normalt drift, en for serial og en for parallel
+- Der skabes en Run.log, der viser processen programmet tog.
+- Der skabes en TestReport.md fil der afspejler test. 
 
 ---
 

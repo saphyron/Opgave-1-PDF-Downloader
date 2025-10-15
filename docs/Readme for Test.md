@@ -3,7 +3,7 @@
 - xUnit + FluentAssertions + Moq til **enhedstest**
 - **Integrationstest** med rigtige CSV/Excel-filer (ClosedXML/CsvHelper)
 - **Code Coverage** via coverlet + rapport i `TestResults`
-- **GitHub Actions** workflow (CI) til automatisk kørsel
+- **GitHub Actions** workflow (CI) til automatisk kørsel (Er ikke teste om det virker endnu)
 - PowerShell 5.1 kompatible scripts
 
 ## Forudsætninger
@@ -12,27 +12,28 @@
 - Dit app-projekt: `PDF Downloader/PDF Downloader.csproj` (target: net9.0)
 
 ## Struktur i denne pakke
+```text
+Legend (kort): 📁 mappe • 🧩 C#-kode  • 🪪 .sln/.csproj
+
+📁 tests/
+└─ 📁 PdfDownloader.Tests/
+   ├─ 🪪 PdfDownloader.Tests.csproj
+   ├─ 🧩 GlobalUsings.cs
+   ├─ 📁 Fakes/
+   │  ├─ 🧩 FakeHttpMessageHandler.cs
+   │  └─ 🧩 ThrowingHttpMessageHandler.cs
+   ├─ 📁 Integration/
+   │  ├─ 🧩 ExcelIntegrationTests.cs
+   │  └─ 🧩 PipelineIntegrationTests.cs
+   └─ 📁 Unit/
+      ├─ 🧩 AppOptionsTests.cs
+      ├─ 🧩 DownloadManagerTests.cs
+      ├─ 🧩 MetadataLoaderTests.cs
+      ├─ 🧩 MetadataRecordTests.cs          
+      ├─ 🧩 StatusReportReaderAllTests.cs
+      └─ 🧩 StatusReportWriterTests.cs
 ```
-TestPack-PdfDownloader/
-  .github/workflows/ci.yml
-  samples/
-    sample-input.csv
-    sample-input.xlsx
-  scripts/
-    test.ps1
-    coverage.ps1
-  tests/PdfDownloader.Tests/
-    PdfDownloader.Tests.csproj
-    Unit/
-      MetadataLoaderTests.cs
-      DownloadManagerTests.cs
-    Integration/
-      PipelineIntegrationTests.cs
-      StatusReportTests.cs
-    TestHelpers/
-      TempDir.cs
-      HttpMessageHandlerStub.cs
-```
+
 
 ## Hurtig start
 1. **Klon/åbn dit app-projekt** (PDF Downloader).
@@ -40,7 +41,7 @@ TestPack-PdfDownloader/
 3. I app-projektet, tilføj `Properties/AssemblyInfo.cs` med `InternalsVisibleTo` (se ovenfor).
 4. Kør:
    ```powershell
-   ./scripts/test.ps1
+   powershell -ExecutionPolicy Bypass -File ".\scripts\TestReport.ps1
    ```
    Det vil:
    - Restore løsningen
@@ -48,19 +49,7 @@ TestPack-PdfDownloader/
    - Køre tests
    - Lave coverage-rapport
 
-## Kør tests manuelt
-```powershell
-dotnet restore
-dotnet build --configuration Release
-dotnet test ./tests/PdfDownloader.Tests/PdfDownloader.Tests.csproj `
-  --configuration Release `
-  --collect:"XPlat Code Coverage" `
-  --results-directory ./TestResults
-```
-
-Coverage-rapport (Cobertura) findes i `TestResults/**/coverage.cobertura.xml`.
-
-## CI (GitHub Actions)
+## CI (GitHub Actions) Er ikke test om den virker endnu.
 - Workflow ligger i `.github/workflows/ci.yml` – den kører restore, build, test og uploader coverage-artifacts.
 - Push til `main` eller PR → CI kører automatisk.
 
