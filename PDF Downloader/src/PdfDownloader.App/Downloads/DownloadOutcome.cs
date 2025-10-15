@@ -6,4 +6,5 @@ internal enum DownloadOutcome
     SkippedExisting,
     Failed,
     NoUrl,
+    TimedOut,
 }

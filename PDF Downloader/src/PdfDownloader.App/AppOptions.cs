@@ -21,7 +21,12 @@ internal sealed record AppOptions
     int? ToIndex,                   // 1-baseret slutposition (inklusiv)
     bool OverwriteDownloads,        // hvis true: hent igen selvom fil findes
     bool DetectChanges,             // hvis true: sammenlign med eksisterende (SHA-256)
-    bool KeepOldOnChange            // hvis true: omdøb gammel til *.updated ved forskel
+    bool KeepOldOnChange,           // hvis true: omdøb gammel til *.updated ved forskel
+    // timeouts
+    TimeSpan DownloadTimeout,       // total pr. fil (0 = slået fra)
+    TimeSpan IdleTimeout,           // ingen bytes i så lang tid => afbryd (0 = slået fra)
+    bool NoTimeout,                 // overstyr alt og kør “så længe som muligt”
+    TimeSpan ConnectTimeout         // TCP/TLS opkobling
 )
 {
     public static string Usage => """
@@ -31,17 +36,21 @@ Brug: dotnet run -- --input <sti> --output <dir> [--status <sti>]
                    [--resume-from-status <sti>] [--append-status] [--overwrite-status]
                    [--first <N>] [--skip <N>] [--take <N>] [--from <i>] [--to <j>]
                    [--overwrite-downloads] [--detect-changes] [--keep-old-on-change]
+                   [--download-timeout hh:mm:ss] [--idle-timeout hh:mm:ss]
+                   [--no-timeout] [--connect-timeout hh:mm:ss]
 """;
 
     public static AppOptions Parse(string[] args)
     {
-        // helper
+        // helpers
         string? Get(string name)
         {
             var i = Array.FindIndex(args, a => string.Equals(a, $"--{name}", StringComparison.OrdinalIgnoreCase));
             return (i >= 0 && i + 1 < args.Length) ? args[i + 1] : null;
         }
         bool Has(string name) => args.Any(a => string.Equals(a, $"--{name}", StringComparison.OrdinalIgnoreCase));
+        static TimeSpan GetTsOr(string? s, TimeSpan fallback)
+            => TimeSpan.TryParse(s, out var ts) ? ts : fallback;
 
         var inputStr   = Get("input") ?? throw new OptionParsingException("Mangler --input");
         var outputStr  = Get("output") ?? throw new OptionParsingException("Mangler --output");
@@ -56,10 +65,9 @@ Brug: dotnet run -- --input <sti> --output <dir> [--status <sti>]
         var skipExisting = !Has("no-skip-existing");
 
         var resumeStr  = Get("resume-from-status");
-        var append     = Has("append-status");        // default false
-        var overwriteS = Has("overwrite-status");     // default false
+        var append     = Has("append-status");
+        var overwriteS = Has("overwrite-status");
         if (append && overwriteS) throw new OptionParsingException("Vælg enten --append-status eller --overwrite-status (ikke begge).");
-        // default: hvis ingen angives → append=true hvis status-fil eksisterer, ellers opret ny og skriv header
         if (!append && !overwriteS) append = true;
 
         int? first     = int.TryParse(Get("first"), out var f) ? f : null;
@@ -70,7 +78,13 @@ Brug: dotnet run -- --input <sti> --output <dir> [--status <sti>]
 
         var overwriteDownloads = Has("overwrite-downloads");
         var detectChanges      = Has("detect-changes");
-        var keepOldOnChange    = Has("keep-old-on-change") || overwriteDownloads; // giver mening at gemme gammel hvis vi overwriter
+        var keepOldOnChange    = Has("keep-old-on-change") || overwriteDownloads;
+
+        // NEW — parse timeouts (standard: 02:00 total, 00:15 idle, 00:10 connect)
+        var dlTimeout      = GetTsOr(Get("download-timeout"), TimeSpan.FromMinutes(2));
+        var idleTimeout    = GetTsOr(Get("idle-timeout"),     TimeSpan.FromSeconds(15));
+        var noTimeout      = Has("no-timeout");
+        var connectTimeout = GetTsOr(Get("connect-timeout"),  TimeSpan.FromSeconds(10));
 
         var input   = new FileInfo(inputStr);
         var output  = new DirectoryInfo(outputStr);
@@ -97,7 +111,11 @@ Brug: dotnet run -- --input <sti> --output <dir> [--status <sti>]
             toIdx,
             overwriteDownloads,
             detectChanges,
-            keepOldOnChange
+            keepOldOnChange,
+            dlTimeout,
+            idleTimeout,
+            noTimeout,
+            connectTimeout
         );
     }
 }

@@ -118,5 +118,3 @@ _Ingen per-package detaljer tilgÃ¦ngelige (afhÃ¦nger af Cobertura layout)._
 - Checksum i status (ny kolonne) for hurtig detektion af uÃ¦ndrede filer uden at Ã¥bne eksisterende filer hver gang.
 - Parallel I/O-tuning: bufferstÃ¸rrelser og CopyToAsync med cancellationToken + evt. temp-fil i outputdir for lavere cross-disk I/O.
 - Robust kolonne-mapping: valgfri alias-liste for Id/Pdf_URL i MetadataLoader for endnu mere 'live data'-tolerance.
-
-

@@ -1,4 +1,7 @@
+using System.Buffers;
 using System.Collections.Concurrent;
+using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 
@@ -14,18 +17,22 @@ internal sealed class DownloadManager : IDisposable
     private readonly bool _detectChanges;
     private readonly bool _keepOldOnChange;
 
-    // logging + timing
+    // NEW — timeouts
+    private readonly TimeSpan _downloadTimeout;
+    private readonly TimeSpan _idleTimeout;
+    private readonly bool _noTimeout;
+    private readonly TimeSpan _connectTimeout;
+
     private readonly Action<string> _log;
     private readonly ConcurrentDictionary<string, DateTimeOffset> _startTimes = new();
     private readonly ConcurrentDictionary<string, string> _states = new();
 
-    // "tråde" (slots) for at kunne beregne gennemsnit pr. tråd
     private readonly ConcurrentQueue<int> _slotPool;
     private readonly ConcurrentDictionary<string, int> _slotOfId = new();
-    private readonly ConcurrentDictionary<int, long> _slotTotalMs = new(); // ms pr. slot
+    private readonly ConcurrentDictionary<int, long> _slotTotalMs = new();
     private readonly ConcurrentDictionary<int, int> _slotCounts = new();
 
-    // Prod-ctor (bruger default HttpClient)
+    // Prod-ctor
     public DownloadManager(
         DirectoryInfo outputDirectory,
         int maxConcurrency,
@@ -33,12 +40,35 @@ internal sealed class DownloadManager : IDisposable
         bool overwriteDownloads,
         bool detectChanges,
         bool keepOldOnChange,
+        TimeSpan downloadTimeout,   // NEW
+        TimeSpan idleTimeout,       // NEW
+        bool noTimeout,             // NEW
+        TimeSpan connectTimeout,    // NEW
         Action<string>? logger = null)
     {
         _outputDirectory = outputDirectory;
-        _httpClient = new HttpClient
+
+        _downloadTimeout = downloadTimeout;
+        _idleTimeout = idleTimeout;
+        _noTimeout = noTimeout;
+        _connectTimeout = connectTimeout;
+
+        var handler = new SocketsHttpHandler
         {
-            Timeout = TimeSpan.FromSeconds(60) // 120 → 60 sek
+            MaxConnectionsPerServer = 256,
+            EnableMultipleHttp2Connections = true,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli,
+            ConnectTimeout = _connectTimeout
+        };
+
+        _httpClient = new HttpClient(handler)
+        {
+            DefaultRequestVersion = HttpVersion.Version20,
+            DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower,
+            Timeout = _noTimeout
+                ? Timeout.InfiniteTimeSpan
+                : (_downloadTimeout > TimeSpan.Zero ? _downloadTimeout : Timeout.InfiniteTimeSpan)
         };
         _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PdfDownloader", "1.0"));
         _httpClient.DefaultRequestHeaders.Accept.TryParseAdd("application/pdf");
@@ -67,13 +97,25 @@ internal sealed class DownloadManager : IDisposable
         bool overwriteDownloads,
         bool detectChanges,
         bool keepOldOnChange,
+        TimeSpan downloadTimeout,
+        TimeSpan idleTimeout,
+        bool noTimeout,
+        TimeSpan connectTimeout,
         HttpMessageHandler httpHandler,
         Action<string>? logger = null)
     {
         _outputDirectory = outputDirectory;
+
+        _downloadTimeout = downloadTimeout;
+        _idleTimeout = idleTimeout;
+        _noTimeout = noTimeout;
+        _connectTimeout = connectTimeout;
+
         _httpClient = new HttpClient(httpHandler)
         {
-            Timeout = TimeSpan.FromSeconds(60) // 120 → 60 sek
+            Timeout = _noTimeout
+                ? Timeout.InfiniteTimeSpan
+                : (_downloadTimeout > TimeSpan.Zero ? _downloadTimeout : Timeout.InfiniteTimeSpan)
         };
         _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PdfDownloader", "1.0"));
         _httpClient.DefaultRequestHeaders.Accept.TryParseAdd("application/pdf");
@@ -104,6 +146,7 @@ internal sealed class DownloadManager : IDisposable
         var tasks = requests.Select(async req =>
         {
             await throttler.WaitAsync(ct).ConfigureAwait(false);
+            bool sawTimeout = false; // NEW
             string? lastReason = null;
             var slot = RentSlot();
 
@@ -113,7 +156,6 @@ internal sealed class DownloadManager : IDisposable
 
                 var file = new FileInfo(Path.Combine(_outputDirectory.FullName, SanitizeFileName(req.Id) + ".pdf"));
 
-                // Skip eksisterende
                 if (file.Exists && !_overwriteDownloads && _skipExisting)
                 {
                     var res = new DownloadResult(req.Id, DownloadOutcome.SkippedExisting, "Already exists", null, file);
@@ -122,15 +164,19 @@ internal sealed class DownloadManager : IDisposable
                     return;
                 }
 
-                // primær → fallback
                 foreach (var url in req.Urls)
                 {
                     if (string.IsNullOrWhiteSpace(url)) continue;
 
+                    // NEW — per-fil timeout der kan skelne fra global cancellation
+                    using var perFileCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                    if (!_noTimeout && _downloadTimeout > TimeSpan.Zero)
+                        perFileCts.CancelAfter(_downloadTimeout);
+
                     try
                     {
                         UpdateRow(req.Id, "Henter (headers)...", slot);
-                        using var resp = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
+                        using var resp = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, perFileCts.Token).ConfigureAwait(false);
 
                         if (!resp.IsSuccessStatusCode)
                         {
@@ -149,12 +195,19 @@ internal sealed class DownloadManager : IDisposable
                             continue;
                         }
 
-                        // hent til temp (mulig ændringsdetektion)
                         var tempPath = Path.GetTempFileName();
                         UpdateRow(req.Id, "Downloader indhold...", slot);
-                        await using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        await using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan))
+                        await using (var net = await resp.Content.ReadAsStreamAsync(perFileCts.Token))
                         {
-                            await resp.Content.CopyToAsync(fs, ct).ConfigureAwait(false);
+                            if (_noTimeout || _idleTimeout <= TimeSpan.Zero)
+                            {
+                                await net.CopyToAsync(fs, 64 * 1024, perFileCts.Token).ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                await CopyToAsyncWithIdleTimeout(net, fs, 64 * 1024, _idleTimeout, perFileCts.Token).ConfigureAwait(false);
+                            }
                         }
 
                         if (file.Exists && (_overwriteDownloads || _detectChanges))
@@ -195,8 +248,9 @@ internal sealed class DownloadManager : IDisposable
                         results.Add(ok);
                         return;
                     }
-                    catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+                    catch (OperationCanceledException) when (!ct.IsCancellationRequested)
                     {
+                        sawTimeout = true;
                         lastReason = "Timeout";
                         UpdateRow(req.Id, "Timeout – prøver næste", slot);
                         continue;
@@ -209,9 +263,10 @@ internal sealed class DownloadManager : IDisposable
                     }
                 }
 
-                // alle forsøg fejlede
                 var msg = req.Urls.Count == 0 ? "No URL" : (lastReason ?? "All URLs failed");
-                var outcome = req.Urls.Count == 0 ? DownloadOutcome.NoUrl : DownloadOutcome.Failed;
+                var outcome = req.Urls.Count == 0
+                    ? DownloadOutcome.NoUrl
+                    : (sawTimeout ? DownloadOutcome.TimedOut : DownloadOutcome.Failed);
 
                 var failed = new DownloadResult(req.Id, outcome, msg, null, null);
                 CompleteRow(failed, slot);
@@ -251,7 +306,6 @@ internal sealed class DownloadManager : IDisposable
         var id = result.Id;
         var elapsed = ElapsedFor(id);
 
-        // akkumulér pr. slot
         if (_startTimes.TryGetValue(id, out var t0))
         {
             var ms = (long)(DateTimeOffset.UtcNow - t0).TotalMilliseconds;
@@ -264,6 +318,7 @@ internal sealed class DownloadManager : IDisposable
             DownloadOutcome.Downloaded      => ("OK",   "PDF gemt korrekt"),
             DownloadOutcome.SkippedExisting => ("SKIP", "Filen findes allerede"),
             DownloadOutcome.NoUrl           => ("MISS", "Mangler gyldig URL i metadata"),
+            DownloadOutcome.TimedOut        => ("TIME", "Afbryd pga. timeout"),
             _                               => ("FAIL", "Fejl (HTTP, IO, timeout, forkert content-type)")
         };
 
@@ -283,7 +338,6 @@ internal sealed class DownloadManager : IDisposable
 
     private int RentSlot()
     {
-        // WaitAsync sørger for at der *bør* være en ledig slot. Spin meget kort hvis race.
         int slot;
         while (!_slotPool.TryDequeue(out slot))
         {
@@ -323,6 +377,30 @@ internal sealed class DownloadManager : IDisposable
         foreach (var ch in input)
             builder[index++] = invalid.Contains(ch) ? '_' : ch;
         return new string(builder, 0, index);
+    }
+
+    // NEW — stream copy med idle-timeout
+    private static async Task CopyToAsyncWithIdleTimeout(Stream src, Stream dst, int bufferSize, TimeSpan idleTimeout, CancellationToken ct)
+    {
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+        try
+        {
+            using var idleCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+            while (true)
+            {
+                idleCts.CancelAfter(idleTimeout);
+                int n = await src.ReadAsync(buffer.AsMemory(0, bufferSize), idleCts.Token);
+                if (n == 0) break;
+
+                idleCts.CancelAfter(idleTimeout);
+                await dst.WriteAsync(buffer.AsMemory(0, n), idleCts.Token);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
     }
 
     public void Dispose() => _httpClient.Dispose();

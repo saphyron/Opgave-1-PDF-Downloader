@@ -1,8 +1,11 @@
 # Concurrency-resultater for PDF Downloader
 
 **Maskine:** AMD Ryzen 7 5825U (8 kerner / 16 tråde) @ ~2.0 GHz • 16 GB RAM • 512 GB SSD  
-**Datasæt:** 2000 rækker (2006–2016)  
-**Timeout:** 60 s pr. anmodning  
+**Datasæt:** 2000 rækker (2006–2016) 
+**Server Timeout** 60 s pr. anmodning 
+**Idle Timeout:** 60 s pr. anmodning  
+**Connect Timeout** 10 s pr. anmodning
+**Download Timeout** 60 s pr. anmodning
 **HTTP-klient:** Genbrugt `HttpClient`, parallelisering via `SemaphoreSlim`
 
 ---
@@ -11,7 +14,7 @@
 
 Test parameter
 ```bash
-dotnet run --   --input "..\samples\Metadata2006_2016.xlsx"   --output ".\Downloads"   --status ".\Downloads\status_test2000.csv"   --id-column "BRnum"   --url-column "Pdf_URL"   --fallback-url-column "Pdf_URL_Alt"   --limit 2000   --max-concurrency x
+dotnet run --   --input "..\samples\Metadata2006_2016.xlsx"   --output ".\Downloads"   --status ".\Downloads\status_test2000.csv"   --id-column "BRnum"   --url-column "Pdf_URL"   --fallback-url-column "Pdf_URL_Alt"   --limit 2000   --max-concurrency x    --download-timeout 00:01:00   --idle-timeout 00:01:00
 ```
 
 - Concurrency reducerer testtiden kraftigt: fra **-** (-×) til **~-** ved - samtidige (ca. **-** hurtigere).
@@ -20,14 +23,14 @@ dotnet run --   --input "..\samples\Metadata2006_2016.xlsx"   --output ".\Downlo
 
 | Samtidige downloads | Tid (mm:ss.mmm) | Tid (sekunder) | Speedup vs. 1× | **Effektivitet ift. 1×** |
 |---:|:---:|---:|---:|---:|
-| 1  | 103:17:561 | - | 1,00× | **-** |
+| 1  | - | - | 1,00× | **-** |
 | 2  | - | - | -× | **- %** |
 | 4  | - | - | -× | **- %** |
-| 8  | - | - | -× | **- %** |
-| 16 | 07:40.870 | -  | -× | **- %** |
-| 32 | 05:58.063 | -  | -× | **- %** |
-| 50 | 05:20.643 | -  | -× | **- %**  |
-| 100| - | - | -× | **- %**  |
+| 8  | 10:31:292 | - | -× | **- %** |
+| 16 | 05:41:356 | - | -× | **- %** |
+| 32 | 03:16:299 | - | -× | **- %** |
+| 50 | 02:29:727 | - | -× | **- %**  |
+| 100| 01:40:852 | - | -× | **- %**  |
 
 
 **Observationer:**

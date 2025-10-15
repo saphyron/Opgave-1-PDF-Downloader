@@ -36,6 +36,11 @@ internal sealed class ApplicationRunner(AppOptions options)
         if (options.StatusReport is not null) Log($"Status CSV: {options.StatusReport.FullName}");
         Log($"Max concurrency: {options.MaxConcurrency}");
         Log($"Limit: {options.Limit}");
+
+        // NEW: Log timeout-indstillinger
+        Log($"Download timeout: {(options.NoTimeout ? "off (no-timeout)" : FormatTs(options.DownloadTimeout))}");
+        Log($"Idle timeout    : {(options.NoTimeout ? "off (no-timeout)" : FormatTs(options.IdleTimeout))}");
+        Log($"Connect timeout : {FormatTs(options.ConnectTimeout)}");
         Log("");
 
         var loader = new MetadataLoader();
@@ -91,14 +96,19 @@ internal sealed class ApplicationRunner(AppOptions options)
         // 4) Download
         var requests = finalList.Select(r => new DownloadRequest(r.Id, r.GetOrderedUrls())).ToList();
 
+        // NEW: før timeout-parametre videre til DownloadManager
         var mgr = new DownloadManager(
-            options.Output,
-            options.MaxConcurrency,
-            skipExisting: options.SkipExisting,
-            overwriteDownloads: options.OverwriteDownloads,
-            detectChanges: options.DetectChanges,
-            keepOldOnChange: options.KeepOldOnChange,
-            logger: Log // <- alt der logges fra DownloadManager går også i filen
+            outputDirectory:      options.Output,
+            maxConcurrency:       options.MaxConcurrency,
+            skipExisting:         options.SkipExisting,
+            overwriteDownloads:   options.OverwriteDownloads,
+            detectChanges:        options.DetectChanges,
+            keepOldOnChange:      options.KeepOldOnChange,
+            downloadTimeout:      options.DownloadTimeout,
+            idleTimeout:          options.IdleTimeout,
+            noTimeout:            options.NoTimeout,
+            connectTimeout:       options.ConnectTimeout,
+            logger:               Log // <- alt der logges fra DownloadManager går også i filen
         );
 
         var results = await mgr.DownloadAsync(requests, cancellationToken);
@@ -108,19 +118,22 @@ internal sealed class ApplicationRunner(AppOptions options)
         var skipped    = results.Count(r => r.Outcome == DownloadOutcome.SkippedExisting);
         var failed     = results.Count(r => r.Outcome == DownloadOutcome.Failed);
         var missing    = results.Count(r => r.Outcome == DownloadOutcome.NoUrl);
+        var timedOut   = results.Count(r => r.Outcome == DownloadOutcome.TimedOut); // NEW
 
         Log("");
         Log("Opsummering (denne kørsel):");
-        Log($"  Hentet: {downloaded}");
-        Log($"  Skippet (allerede hentet/ingen ændring): {skipped}");
-        Log($"  Fejlet: {failed}");
+        Log($"  Hentet : {downloaded}");
+        Log($"  Skippet: {skipped} (allerede hentet/ingen ændring)");
+        Log($"  Timeout: {timedOut}"); // NEW
+        Log($"  Fejlet : {failed}");
         Log($"  Ingen URL: {missing}");
 
-        // Fejl fordelt på årsag (baseret på Result.Message)
+        // NEW: Fejl-fordeling inkl. timed out
         var reasonGroups = results
-            .Where(r => r.Outcome == DownloadOutcome.Failed)
+            .Where(r => r.Outcome == DownloadOutcome.Failed || r.Outcome == DownloadOutcome.TimedOut)
             .GroupBy(r =>
             {
+                if (r.Outcome == DownloadOutcome.TimedOut) return "Timeout";
                 var m = r.Message ?? "";
                 if (m.StartsWith("HTTP ")) return m;                       // fx "HTTP 404"
                 if (m.StartsWith("Content-Type:")) return m;               // fx "Content-Type: text/html"
@@ -169,4 +182,7 @@ internal sealed class ApplicationRunner(AppOptions options)
         if (ts.TotalHours >= 1) return $"{(int)ts.TotalHours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
         return $"{(int)ts.TotalMinutes:00}:{ts.Seconds:00}";
     }
+
+    // NEW: “off” hvis 0 eller negativ
+    private static string FormatTs(TimeSpan ts) => ts <= TimeSpan.Zero ? "off" : ts.ToString();
 }
