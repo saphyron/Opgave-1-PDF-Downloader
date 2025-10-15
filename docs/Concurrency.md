@@ -1,7 +1,7 @@
 # Concurrency-resultater for PDF Downloader
 
 **Maskine:** AMD Ryzen 7 5825U (8 kerner / 16 tråde) @ ~2.0 GHz • 16 GB RAM • 512 GB SSD  
-**Datasæt:** 100 rækker (2006–2016)  
+**Datasæt:** 2000 rækker (2006–2016)  
 **Timeout:** 60 s pr. anmodning  
 **HTTP-klient:** Genbrugt `HttpClient`, parallelisering via `SemaphoreSlim`
 
@@ -9,27 +9,32 @@
 
 ## Målte køretider
 
-- Concurrency reducerer testtiden kraftigt: fra **4:06** (1×) til **~1:09** ved 16–32 samtidige (ca. **3,5–3,6×** hurtigere).
-- Den bedste “bang-for-buck” ligger omkring **8–16** samtidige downloads. Herefter flader gevinsten ud.
+Test parameter
+```bash
+dotnet run --   --input "..\samples\Metadata2006_2016.xlsx"   --output ".\Downloads"   --status ".\Downloads\status_test2000.csv"   --id-column "BRnum"   --url-column "Pdf_URL"   --fallback-url-column "Pdf_URL_Alt"   --limit 2000   --max-concurrency x
+```
+
+- Concurrency reducerer testtiden kraftigt: fra **-** (-×) til **~-** ved - samtidige (ca. **-** hurtigere).
+- Den bedste “bang-for-buck” ligger omkring **-** samtidige downloads. Herefter flader gevinsten ud.
 
 
 | Samtidige downloads | Tid (mm:ss.mmm) | Tid (sekunder) | Speedup vs. 1× | **Effektivitet ift. 1×** |
 |---:|:---:|---:|---:|---:|
-| 1  | 04:06.562 | 246,562 | 1,00× | **-** |
-| 2  | 02:11.942 | 131,942 | 1,87× | **46.5 %** |
-| 4  | 01:32.303 | 92,303  | 2,67× | **62.6 %** |
-| 8  | 01:17.300 | 77,300  | 3,19× | **68.7 %** |
-| 16 | 01:09.794 | 69,794  | 3,53× | **71.7 %** |
-| 32 | 01:08.781 | 68,781  | 3,59× | **72.1 %** |
-| 50 | 01:08.999 | 68,999  | 3,57× | **72.0 %**  |
-| 100| 01:09.255 | 69,255  | 3,56× | **71.9 %**  |
+| 1  | 103:17:561 | - | 1,00× | **-** |
+| 2  | - | - | -× | **- %** |
+| 4  | - | - | -× | **- %** |
+| 8  | - | - | -× | **- %** |
+| 16 | 07:40.870 | -  | -× | **- %** |
+| 32 | 05:58.063 | -  | -× | **- %** |
+| 50 | 05:20.643 | -  | -× | **- %**  |
+| 100| - | - | -× | **- %**  |
 
 
 **Observationer:**
 
-- Markant fald fra 1 → 8 tråde (≈ 246 s → 77 s).  
-- Herefter flader kurven ud: omkring **16–32** tråde rammer vi en “bund” på **~69 s**.  
-- Højere concurrency (50–100) giver ingen reel forbedring og kan endda svinge en smule.
+- Markant fald fra - → - tråde (≈ - s → - s).  
+- Herefter flader kurven ud: omkring **-** tråde rammer vi en “bund” på **~- s**.  
+- Højere concurrency (-) giver ingen reel forbedring og kan endda svinge en smule.
 
 ---
 
@@ -41,7 +46,7 @@
 Selv om mange downloads kan køre samtidigt, er der sektioner der ikke kan paralleliseres: læsning af metadata, log-/statusskrivning, planlægning mv. Den ikke-parallelle andel begrænser maksimal speedup.
 
 **2) “Lang hale” i netværket**  
-En del links fejler hurtigt (404/403/301/HTML osv.), men nogle hænger i op til **60 s timeout**. Selvom 90 % af opgaverne bliver færdige hurtigt med høj concurrency, skal total-kørslen stadig vente på de langsomste resterende opgaver. Det skaber et naturligt **gulv ≈ timeout + overhead** (her ~69 s).
+En del links fejler hurtigt (404/403/301/HTML osv.), men nogle hænger i op til **60 s timeout**. Selvom 90 % af opgaverne bliver færdige hurtigt med høj concurrency, skal total-kørslen stadig vente på de langsomste resterende opgaver. Det skaber et naturligt **gulv ≈ timeout + overhead** (her ~- s).
 
 **3) Server-throttling og fejlkoder**  
 Mange links går til få domæner, som kan begrænse forbindelser (rate limits) eller svare med fejlkoder. Mere concurrency lokalt hjælper ikke mod fjernservernes grænser – det kan endda udløse flere 403/429/5xx.
@@ -61,10 +66,10 @@ PDF’erne er relativt små, men skrivning/logging/status-CSV er stadig delt res
 - **Netværk:** Den reelle begrænsning er fjernservernes respons og fejlkoder, samt min timeout på 60 s.
 
 **Praktisk sweet spot:**  
-Ud fra målingerne ligger et fornuftigt valg omkring **8–16 samtidige downloads**.  
-- 8 tråde: ~77 s (god balance).  
-- 16 tråde: ~70 s (tæt på bundgrænsen).  
-Over 16 tråde får du marginal eller ingen gevinst, men mere støj i loggen og potentielt flere fejl fra fjernservere.
+Ud fra målingerne ligger et fornuftigt valg omkring **- samtidige downloads**.  
+- - tråde: ~- s (god balance).  
+- - tråde: ~- s (tæt på bundgrænsen).  
+Over - tråde får du marginal eller ingen gevinst, men mere støj i loggen og potentielt flere fejl fra fjernservere.
 
 ---
 
@@ -90,7 +95,7 @@ Over 16 tråde får du marginal eller ingen gevinst, men mere støj i loggen og 
    - Giv kort, begrænset retry på transiente fejl (5xx, timeouts) med **exponential backoff + jitter**.
 
 4) **Adaptiv concurrency:**  
-   - Start ved 8–12 og **justér op/ned** baseret på aktuel fejlrate/latens (f.eks. glidende middel).  
+   - Start ved - og **justér op/ned** baseret på aktuel fejlrate/latens (f.eks. glidende middel).  
    - Hvis andel 404/HTML er høj, er flere tråde sjældent hjælpsomt.
 
 5) **Redirect-håndtering og content-sniff:**  
@@ -103,7 +108,7 @@ Over 16 tråde får du marginal eller ingen gevinst, men mere støj i loggen og 
 
 ## Anbefaling (kort) | Anbefalet af AI |
 
-- Brug **8–16** samtidige downloads som standard på denne maskine.  
+- Brug **-** samtidige downloads som standard på denne maskine.  
 - Sæt **hedged requests + begrænsning pr. host** for at tøjle hale og throttling.  
 - Behold **timeout 60 s** (eller lavere for “aggressiv” kørsel), kombineret med **korte retrier** på transiente fejl.  
 - Mål og log **per-host** og **tail percentiler** – optimér mod halen, ikke gennemsnittet.
