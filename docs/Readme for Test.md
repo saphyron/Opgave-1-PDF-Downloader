@@ -1,6 +1,6 @@
 # Test Pack for PDF Downloader (C# / .NET 9, xUnit)
 
-- xUnit + FluentAssertions + Moq til **enhedstest**
+- xUnit + FluentAssertions
 - **Integrationstest** med rigtige CSV/Excel-filer (ClosedXML/CsvHelper)
 - **Code Coverage** via coverlet + rapport i `TestResults`
 - **GitHub Actions** workflow (CI) til automatisk kørsel (Er ikke teste om det virker endnu)
