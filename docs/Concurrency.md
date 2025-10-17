@@ -32,18 +32,18 @@ dotnet run -- \
 - Concurrency reducerer testtiden kraftigt: fra **79:17.656** (1×) til **01:40.852** ved **100** samtidige (≈ **47.17×** hurtigere).
 - Den bedste *bang-for-buck* ligger omkring **32–50** samtidige downloads. Herefter er gevinsten relativt lille.
 
-| Samtidige downloads | Tid (mm:ss:mmm) | Tid (sekunder) | Speedup vs. 1× | **Effektivitet ift. 1×** | Tid Server PC<br />(mm:ss:mmm) |
-| ------------------: | :-------------: | -------------: | --------------: | ------------------------------: | ------------------------------ |
-|                   1 |    79:17:656    |       4757.656 |          1,00× |                    **0%** |                                |
-|                   2 |    45:30:962    |       2730.962 |          1.74× |                 **13 %** | 41:17:827                      |
-|                   4 |    21:22:729    |       1282.729 |          3.71× |                   **7 %** | 21:51:332                      |
-|                   8 |    10:31:292    |        631.292 |          7.54× |                   **6 %** | 11:27:622                      |
-|                  16 |    05:41:356    |        341.356 |         13.94× |                  **13 %** | 05:46:653                      |
-|                  32 |    03:16:299    |        196.299 |         24.24× |                  **24 %** | 03:22:674                      |
-|                  50 |    02:29:727    |        149.727 |         31.78× |                  **36 %** | 02:34:039                      |
-|                 100 |    01:40:852    |        100.852 |         47.17× |                  **53 %** | 01:45:194                      |
+| Samtidige downloads | Tid (mm:ss:mmm) | Tid (sekunder) | Speedup vs. 1× | **Overhead ift. 1×** | Tid Server PC<br />(mm:ss:mmm) |
+| ------------------: | :-------------: | -------------: | --------------: | --------------------------: | ------------------------------ |
+|                   1 |    79:17:656    |       4757.656 |          1,00× |                **0%** | 77:36:619                      |
+|                   2 |    45:30:962    |       2730.962 |          1.74× |             **13 %** | 41:17:827                      |
+|                   4 |    21:22:729    |       1282.729 |          3.71× |               **7 %** | 21:51:332                      |
+|                   8 |    10:31:292    |        631.292 |          7.54× |               **6 %** | 11:27:622                      |
+|                  16 |    05:41:356    |        341.356 |         13.94× |              **13 %** | 05:46:653                      |
+|                  32 |    03:16:299    |        196.299 |         24.24× |              **24 %** | 03:22:674                      |
+|                  50 |    02:29:727    |        149.727 |         31.78× |              **36 %** | 02:34:039                      |
+|                 100 |    01:40:852    |        100.852 |         47.17× |              **53 %** | 01:45:194                      |
 
-**Bemærk om effektivitet**
+**Bemærk om effektivitet/overhead**
 
 * Effektivitet (%) er *parallel-effektivitet relativt til 1 tråd* (baseline).
 * **Formel:**`Effektivitet = (Speedup / Concurrency) × 100 = (T₁ / Tₙ / n) × 100`
@@ -204,7 +204,7 @@ Mønsteret er konsistent på tværs af maskiner:
 
 ---
 
-## Anbefaling (kort) | Anbefalet af AI
+## Anbefaling (kort) | Anbefalet af AI |
 
 - Brug **32–50** samtidige downloads som standard (god balance mellem tid og effektivitet).
 - Behold **timeout 60 s** for reproducerbare målinger; brug lavere timeouts for “aggressiv” kørsel.
